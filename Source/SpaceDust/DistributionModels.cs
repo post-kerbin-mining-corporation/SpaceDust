@@ -11,115 +11,176 @@ namespace SpaceDust
      None, Linear
    }
 
+ 
+  [System.Serializable]
   // A base DistributionModel from which all models should derive
   public class DistributionModel
   {
-    public DistributionModel()
-    {}
+    public double BodyRadius = 0d;
+    public DistributionModel(ConfigNode node)
+    { }
 
-    /// Called by the Distribution object on game load. Should set Seed parameters
+    /// <summary>
+    /// 
+    /// </summary>
     public virtual void Initialize()
-    {}
+    { }
 
-    /// Called by parts/UIs to sample concentrations
-    /// Should return a scalar value representing the fraction of the maximum abundance possible
+    public virtual void Load(ConfigNode node)
+    { }
+
+    public virtual double MaxSize() { return 0d; }
+
+    public virtual double Center() { return 0d; }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="altitude"></param>
+    /// <param name="latitude"></param>
+    /// <param name="longitude"></param>
+    /// <returns></returns>
     public virtual double Sample(double altitude, double latitude, double longitude)
-    {}
+    {
+      return 1d;
+    }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public virtual string ToString()
-    {}
+    {
+      return $"(Basic Distribution Model)";
+    }
   }
 
   // A Uniform distribution is the same everywhere
-  public class UniformDistributionModel
+  public class UniformDistributionModel : DistributionModel
   {
-    public UniformDistributionModel()
-    {}
+    public UniformDistributionModel(ConfigNode node):base(node)
+    { }
 
+    public override double MaxSize() { return 0d; }
+
+    public override double Center() { return 0d; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public override void Initialize()
-    {}
+    { }
 
-    /// Should return a scalar value representing the fraction of the maximum abundance possible
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="altitude"></param>
+    /// <param name="latitude"></param>
+    /// <param name="longitude"></param>
+    /// <returns></returns>
     public override double Sample(double altitude, double latitude, double longitude)
     {
-      return 1d
+      return 1d;
     }
 
     public override string ToString()
     {
-      return "Uniform Distribution";
+      return "Uniform Distribution Model( no parameters)";
     }
   }
 
   // A Spherical distribution is a spherical shell
-  public class SphericalDistributionModel
+  [System.Serializable]
+  public class SphericalDistributionModel : DistributionModel
   {
-    double minimumLatitude = -90d;
-    double maximumLatitude = 90d;
-    double centerLatitude = 0d;
-    FalloffType latitudeFalloff;
+    public int seed;
+    public double minimumLatitude = -90d;
+    public double maximumLatitude = 90d;
+    public double centerLatitude = 0d;
+    public float latitudeVariability;
+    public FalloffType latitudeFalloff;
 
-    double minimumAltitude = 0d
-    double maximumAltitude = 70d;
-    double centerAltitude = 0d;
-    FalloffType altitudeFalloff;
+    public double minimumAltitude = 0d;
+    public double maximumAltitude = 100000d;
+    public double centerAltitude = 0d;
+    public float altitudeVariability;
+    public FalloffType altitudeFalloff;
 
 
-    public SphericalDistributionModel(ConfigNode node)
+    public SphericalDistributionModel(ConfigNode node):base (node)
     {
-       node.TryGetValue("latUpperBound", ref minimumLatitude);
-       node.TryGetValue("latLowerBound", ref maximumLatitude);
-       node.TryGetValue("latPeak", ref centerLatitude);
-       node.TryGetValue("latVariability", ref latitudeVariability);
-
-       node.TryGetValue("altLowerBound", ref minimumAltitude);
-       node.TryGetValue("altUpperBound", ref maximumAltitude);
-       node.TryGetValue("altPeak", ref centerAltitude);
-       node.TryGetValue("altVariability", ref altitudeVariability);
-
-       string altFalloffName = "Linear";
-       string latFalloffName = "None";
-
-       node.TryGetValue("altFalloffType", ref altFalloffName);
-       node.TryGetValue("latFalloffType", ref latFalloffName);
-
-        altitudeFalloff = Enum.Parse(typeof(FalloffType), altFalloffName);
-        latitudeFalloff = Enum.Parse(typeof(FalloffType), latFalloffName);
+      Load(node);
     }
 
+    public override void Load(ConfigNode node)
+    {
+      node.TryGetValue("latUpperBound", ref maximumLatitude);
+      node.TryGetValue("latLowerBound", ref minimumLatitude);
+      node.TryGetValue("latPeak", ref centerLatitude);
+      node.TryGetValue("latVariability", ref latitudeVariability);
+
+      node.TryGetValue("altLowerBound", ref minimumAltitude);
+      node.TryGetValue("altUpperBound", ref maximumAltitude);
+      node.TryGetValue("altPeak", ref centerAltitude);
+      node.TryGetValue("altVariability", ref altitudeVariability);
+      node.TryGetEnum<FalloffType>("altFalloffType", ref altitudeFalloff, FalloffType.None);
+      node.TryGetEnum<FalloffType>("latFalloffType", ref latitudeFalloff, FalloffType.None);
+    }
+
+    public override double MaxSize() { return maximumAltitude + BodyRadius; }
+
+    public override double Center() { return centerAltitude + BodyRadius; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public override void Initialize()
     {
-      Random generator = new Random(HighLogic.currentGame.Seed);
-      minimumLatitude += generator.Next(-latitudeVariability, latitudeVariability);
-      maximumLatitude += generator.Next(-latitudeVariability, latitudeVariability);
-      centerLatitude += generator.Next(-latitudeVariability, latitudeVariability);
+      UnityEngine.Random.InitState(HighLogic.fetch.currentGame.Seed);
 
-      minimumAltitude += generator.Next(-altitudeVariability, altitudeVariability);
-      maximumAltitude += generator.Next(-altitudeVariability, altitudeVariability);
-      centerAltitude += generator.Next(-altitudeVariability, altitudeVariability);
+      minimumLatitude += UnityEngine.Random.Range(-latitudeVariability, latitudeVariability);
+      maximumLatitude += UnityEngine.Random.Range(-latitudeVariability, latitudeVariability);
+      centerLatitude += UnityEngine.Random.Range(-latitudeVariability, latitudeVariability);
+
+      minimumAltitude += UnityEngine.Random.Range(-altitudeVariability, altitudeVariability);
+      maximumAltitude += UnityEngine.Random.Range(-altitudeVariability, altitudeVariability);
+      centerAltitude += UnityEngine.Random.Range(-altitudeVariability, altitudeVariability);
     }
 
-    /// Should return a scalar value representing the fraction of the maximum abundance possible
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="altitude"></param>
+    /// <param name="latitude"></param>
+    /// <param name="longitude"></param>
+    /// <returns></returns>
     public override double Sample(double altitude, double latitude, double longitude)
     {
-      double latFactor = CalculateLatFactor(latitude);
+
+      double latFactor = CalculateLatFactor(90d - latitude);
       double altFactor = CalculateAltFactor(altitude);
 
-      return latFactor*altFactor;
+      //Utils.Log($"{altitude}, {latitude}, {longitude}, {latFactor}, {altFactor}");
+
+      return altFactor * latFactor;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="altitude"></param>
+    /// <returns></returns>
     double CalculateAltFactor(double altitude)
     {
       if (altitudeFalloff == FalloffType.Linear)
       {
-        if (maximumAltitude - altitude > centerAltitude):
-          return 1.0d - (altitude - centerAltitude)/(maximumAltitude - centerAltitude);
+        if (altitude > (centerAltitude + BodyRadius))
+          return 1d - (altitude - (centerAltitude + BodyRadius)) / (maximumAltitude - (centerAltitude + BodyRadius));
         else
-          return(altitude - minimumAltitude)/(centerAltitude - miniumAltitude);
+          return 1d - (altitude - (centerAltitude + BodyRadius)) / (minimumAltitude - (centerAltitude + BodyRadius));
       }
-      else if (altitudeFalloff == FalloffType.Linear)
+      else if (altitudeFalloff == FalloffType.None)
       {
-        if (altitude >= minimumAltitude && altitude <= maximumAltitude)
+        if (altitude >= minimumAltitude + BodyRadius && altitude <= maximumAltitude + BodyRadius)
           return 1d;
         else
           return 0d;
@@ -127,28 +188,37 @@ namespace SpaceDust
       return 0d;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="latitude"></param>
+    /// <returns></returns>
     double CalculateLatFactor(double latitude)
     {
-      if (latitudeeFalloff == FalloffType.Linear)
+      double latFactor = 0f; ;
+      if (latitudeFalloff == FalloffType.Linear)
       {
-        if (maximumLatitude - latitude > centerLatitude):
-          latFactor = 1.0d - (latitude - centerLatitude)/(maximumLatitude - centerLatitude);
+
+        if (latitude > centerLatitude)
+          latFactor = 1d - (latitude - centerLatitude) / (maximumLatitude - centerLatitude);
         else
-          latFactor = (latitude - minimumAltitude)/(centerLatitude - minimumLatitude);
-      } else if (latitudeFalloff == FalloffType.None)
-      {
-        if (latitute >= minimumLatitude && latitude <= maximumLatitude)
-          return 1d;
-        else
-          return 0d;
+          latFactor = 1d - (latitude - centerLatitude) / (minimumLatitude - centerLatitude);
       }
+      else if (latitudeFalloff == FalloffType.None)
+      {
+        if (latitude >= minimumLatitude && latitude <= maximumLatitude)
+          latFactor = 1d;
+        else
+          latFactor = 0d;
+      }
+      return latFactor;
     }
 
-    public string ToString()
+    public override string ToString()
     {
-      return String.Format("Spherical Distribution:\n -Altitude Range: {0:F1}-{1:F1} km, center {2:F1} km\n" +
-        "-Latitude Range: {3:F1}-{4:F1} km, center {5:F1} km",
+      return String.Format("Spherical Distribution(Altitude Range: {0:F1}-{1:F1} km, center {2:F1} km Latitude Range: {3:F1}-{4:F1} km, center {5:F1} km)",
         minimumAltitude, maximumAltitude, centerAltitude, minimumLatitude, maximumLatitude, centerLatitude);
     }
   }
+
 }

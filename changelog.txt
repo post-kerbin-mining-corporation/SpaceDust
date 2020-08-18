@@ -1,0 +1,165 @@
+v0.5.2
+-------
+- KSP 1.10
+- Updated ModuleManager to 4.1.4
+
+v0.5.1
+-------
+- KSP 1.8
+- Updated ModuleManager to 4.1.3
+- Added Simplified Chinese localization (YoumuKon)
+
+v0.5.0
+-------
+- KSP 1.8
+- Updated ModuleManager to 4.1.0
+
+v0.4.12
+-------
+- Fixed wraparound surface radiators being in the wrong node
+
+v0.4.11
+-------
+- KSP 1.7.x
+- Updated ModuleManager to 4.0.2
+- Added Portugese translation (LianCastro)
+
+v0.4.10
+------
+- Added German translation (Three_Pounds)
+- Added Russian translation (Dr. Jet)
+- Fixed bulkhead profiles (thanks Streetwind)
+
+v0.4.9
+------
+- KSP 1.6.x
+- Updated ModuleManager to 3.1.3
+- Code/config license change to MIT
+
+v0.4.8
+------
+- Removed MiniAVC from distribution
+
+v0.4.7
+------
+- KSP 1.5.0
+- Updated MiniAVC to 1.2.0.6
+- Updated ModuleManager to 3.1.0
+
+v0.4.6
+------
+- KSP 1.4.5
+- Switched versioning to min/max implementation
+
+v0.4.5
+------
+- KSP 1.4.2
+- Updated MiniAVC to 1.2.0.1
+- Updated ModuleManager to 3.0.6
+
+v0.4.4
+------
+- Fixed TechRequired of small fixed radiator
+
+v0.4.3
+------
+- KSP 1.3.1
+- Dependency updates
+
+v0.4.2
+------
+- Spanish translations courtesy of forum user fitiales
+
+v0.4.1
+------
+- Fix description of EF-1K Microchannel Graphene Heat Radiator Panel
+
+v0.4.0
+------
+- KSP 1.3
+- Converted to KSP 1.3 localization
+- Updated included MM to 2.8.0
+- Updated MiniAVC to 1.0.3.3
+- Normalized radiator naming - retractable radiators are xxR and fixed are xxF
+- Added EBR-1000 and EBR-250 Heat Exchangers: pseudo-radiators that pull (non-core) heat to themselves for low electricity costs. High thermal masses.
+- Added DR-8K Microchannel Graphene Heat Radiator: advanced heat radiator with great power to mass ratios. Does not rotate, not retractable
+- Added DR-4K Microchannel Graphene Heat Radiator: half-sized DR-8K
+- Added DF-2K Microchannel Graphene Heat Radiator Panel: Static heat radiator panel, surface attachable
+- Added DF-1K Microchannel Graphene Heat Radiator Panel: similar to DF-2K but cut at a 45 degree angle
+- Normalized High Temperature radiator surface area ratios: dissipated heat now more accurately conforms to surface area ratio
+- Rebalanced mass and cost of all radiators to be consistent with new balance numbers from NFE
+- Renamed all radiators to reflect their new heat transfer numbers
+
+v0.3.4
+------
+- Marked for KSP 1.2.1
+- Updated bundled MM to 2.7.3
+
+v0.3.3
+------
+- KSP 1.2
+- Updated bundled MM
+- Changed all parts' categories to Thermal
+
+v0.3.2
+------
+- KSP 1.1.3
+- Fixed some incorrect radiator power consumption values
+
+v0.3.1
+------
+- KSP 1.1.2 flagged
+
+- Updated bundled MM version
+
+v0.3.0
+------
+
+- KSP 1.1 prototype
+- Added part search tag fields to all radiators
+
+- Added VS-
+3750 and VS-1000 fixed heat radiators
+
+
+v0.2.1
+------
+- Fixed typos in DRE patch
+- Fixed missing radiator parameter
+
+v0.2.0
+------
+- Updated for KSP 1.05
+- Deprecated Heat Exchangers, Heat Pipes and Insulators
+- Deprecated plugin component in favor of stock modules
+- Added conformal radiators from NF Electrical
+- Re-specced radiators as high temp radiators - will perform better when removing core heat than stock radiators
+- Adjusted many mass, cost and capability parameters to match
+
+v0.1.3
+------
+- Fixed description of XR-1500-3X
+- Fixed CTT technodes for 0.1.1 era parts
+- Fixed Tau non-CTT location
+- Slightly decreased mass of RBMK-1500
+
+v0.1.2
+------
+- Fix incorrect archive
+
+
+v0.1.1
+------
+- Added RBMK-1500 and RBMK-1000 Heat Exchangers
+- Added XR-1500x3 Deployable Heat Radiator
+- Added YC 600, YC 400 and YC-400 Surface Heat Radiators
+- Added YZ-70 Heat Radiator Fin
+- Fixed compatability issues with DRE
+- Fixed identical costs for all insulators
+- Cost pass for all radiators, most got cost decreases.
+- Reduced mass of Tau radiator to 0.07 from 0.10
+- Increased mass and heat rejection of XR-6000 (used to be XR-4500) to bring it in line with other radiators
+
+v0.1.0
+------
+- The beginning!
