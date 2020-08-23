@@ -1,8 +1,7 @@
-﻿using System;
+﻿using KSP.Localization;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using KSP.Localization;
 
 namespace SpaceDust
 {
@@ -17,16 +16,7 @@ namespace SpaceDust
     public string Name;
     // The basic efficiency, applied at local V = 0
     public float BaseEfficiency;
-    // The velocity to use when the intake is static
-    public float IntakeVelocityStatic;
-    // Maps how well the intake works as velocity increases. 0 = nothing, 1= baseEfficiency
-    public FloatCurve IntakeVelocityScale;
     
-    public HarvesterType HarvestType;
-    public String HarvestIntakeTransformName;
-
-    public Transform HarvestIntakeTransform;
-
     public HarvestedResource() { }
     public HarvestedResource(ConfigNode node) { Load(node); }
     public void Load(ConfigNode node)
@@ -47,12 +37,29 @@ namespace SpaceDust
     public bool Enabled = false;
 
     // Cost per second to run the miner
-    [KSPField(isPersistant = true)]
+    [KSPField(isPersistant = false)]
     public float PowerCost = 1f;
 
     // Current cost to run the miner
     [KSPField(isPersistant = true)]
     public float CurrentPowerConsumption = 1f;
+
+    // The velocity to use when the intake is static
+    [KSPField(isPersistant = false)]
+    public float IntakeSpeedStatic = 0f;
+    // Maps how well the intake works as velocity increases. 0 = nothing, 1= baseEfficiency
+
+    [KSPField(isPersistant = false)]
+    public FloatCurve IntakeVelocityScale;
+
+    [KSPField(isPersistant = false)]
+    public HarvesterType HarvestType;
+
+    [KSPField(isPersistant = false)]
+    public String HarvestIntakeTransformName;
+
+    
+
 
     // UI field for showing scan status
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources")]
@@ -75,6 +82,7 @@ namespace SpaceDust
     }
 
     protected List<HarvestedResource> resources;
+    protected Transform HarvestIntakeTransform;
 
     public override string GetModuleDisplayName()
     {
@@ -91,6 +99,15 @@ namespace SpaceDust
         msg += res.GenerateInfoString();
       }
       return msg;
+    }
+
+    public override void OnStart(StartState state)
+    {
+      base.OnStart(state);
+      if (HarvestIntakeTransformName != "")
+      {
+        HarvestIntakeTransform = part.FindModelTransform(HarvestIntakeTransformName);
+      }
     }
 
     public override void OnLoad(ConfigNode node)
@@ -152,9 +169,33 @@ namespace SpaceDust
     }
     void DoFocusedHarvesting()
     {
+      double efficiencyMultiplier = 1d;
+      if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0.0001d)
+      {
+        Vector3d worldVelocity = part.vessel.srf_velocity;
+        Vector3 intakeVector;
+        if (HarvestIntakeTransform == null)
+          intakeVector = this.transform.forward;
+        else
+          intakeVector = HarvestIntakeTransform.forward;
 
+        double dot = Vector3d.Dot(worldVelocity, intakeVector);
+        float intakeSpeed = (float)(worldVelocity.magnitude * Math.Abs(dot) + IntakeSpeedStatic);
+        efficiencyMultiplier = IntakeVelocityScale.Evaluate(intakeSpeed);
+        ScoopUI = $"worldVel: {worldVelocity}\nintakeSPeed: {intakeSpeed}\ndot: {dot}\n Effic {efficiencyMultiplier}";
+      }
+      for (int i = 0; i < resources.Count; i++)
+      {
+        double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
+          part.vessel.mainBody,
+          vessel.altitude,
+          vessel.latitude,
+          vessel.longitude);
+
+        
+      }
     }
   }
 
-  
+
 }

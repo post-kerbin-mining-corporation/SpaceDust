@@ -41,7 +41,8 @@ namespace SpaceDust
     float ticker = 0;
     void FixedUpdate()
     {
-      if (fieldGenerated)
+      
+      if ( fieldGenerated)
       {
         ticker += Time.fixedDeltaTime;
         if (ticker > 0.2f)
