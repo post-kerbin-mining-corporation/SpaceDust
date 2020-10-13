@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace SpaceDust
 {
@@ -18,8 +19,59 @@ namespace SpaceDust
     {
       Debug.LogWarning("[SpaceDust]" + str);
     }
-  }
+    // This function loads up some animationstates
+    public static AnimationState[] SetUpAnimation(string animationName, Part part)
+    {
+      var states = new List<AnimationState>();
+      foreach (var animation in part.FindModelAnimators(animationName))
+      {
+        var animationState = animation[animationName];
+        animationState.speed = 0;
+        animationState.enabled = true;
+        // Clamp this or else weird things happen
+        animationState.wrapMode = WrapMode.ClampForever;
+        animation.Blend(animationName);
+        states.Add(animationState);
+      }
+      // Convert
+      return states.ToArray();
+    }
 
+    public static string ToSI(double d, string format = null)
+    {
+      if (d == 0.0)
+        return d.ToString(format);
+
+      char[] incPrefixes = new[] { 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' };
+      char[] decPrefixes = new[] { 'm', '\u03bc', 'n', 'p', 'f', 'a', 'z', 'y' };
+
+      int degree = Mathf.Clamp((int)Math.Floor(Math.Log10(Math.Abs(d)) / 3), -8, 8);
+      if (degree == 0)
+        return d.ToString(format) + " ";
+
+      double scaled = d * Math.Pow(1000, -degree);
+
+      char? prefix = null;
+
+      switch (Math.Sign(degree))
+      {
+        case 1: prefix = incPrefixes[degree - 1]; break;
+        case -1: prefix = decPrefixes[-degree - 1]; break;
+      }
+
+      return scaled.ToString(format) + " " + prefix;
+    }
+  }
+  public static class MathExtensions
+  {
+    // Source: http://stackoverflow.com/a/2683487/1455541
+    public static T Clamp<T>(T val, T min, T max) where T : IComparable<T>
+    {
+      if (val.CompareTo(min) < 0) return min;
+      else if (val.CompareTo(max) > 0) return max;
+      else return val;
+    }
+  }
   public static class TransformDeepChildExtension
   {
     //Breadth-first search
@@ -37,6 +89,8 @@ namespace SpaceDust
       }
       return null;
     }
+    
+
 
     /*
     //Depth-first search

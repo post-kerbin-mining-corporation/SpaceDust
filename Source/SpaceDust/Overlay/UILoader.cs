@@ -9,6 +9,8 @@ namespace SpaceDust
   public class UILoader : MonoBehaviour
   {
     public static GameObject ToolbarWidgetPrefab { get; private set; }
+
+    public static GameObject BandResourceWidgetPrefab { get; private set; }
     public static GameObject ToolbarPanelPrefab { get; private set; }
     
 
@@ -16,7 +18,8 @@ namespace SpaceDust
     {
       Utils.Log("[UILoader]: Loading UI Prefabs");
       AssetBundle prefabs = AssetBundle.LoadFromFile(Path.Combine(KSPUtil.ApplicationRootPath, "GameData/SpaceDust/UI/spacedustui.dat"));
-      ToolbarWidgetPrefab = prefabs.LoadAsset("SpaceDustResourceElement") as GameObject;
+      ToolbarWidgetPrefab = prefabs.LoadAsset("SpaceDustEnhancedResourceElement") as GameObject;
+      BandResourceWidgetPrefab = prefabs.LoadAsset("BandDataWidget") as GameObject;
       ToolbarPanelPrefab = prefabs.LoadAsset("SpaceDustToolbar") as GameObject;
       Utils.Log("[UILoader]: Loaded UI Prefabs");
     }

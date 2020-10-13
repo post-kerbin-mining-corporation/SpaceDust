@@ -50,6 +50,7 @@ namespace SpaceDust
       double sampleResult = 0d;
       for (int i = 0; i< resourceBands.Count ;i++)
       {
+        
         sampleResult += resourceBands[i].Sample(altitude, latitude, longitude);
       }
       return sampleResult;

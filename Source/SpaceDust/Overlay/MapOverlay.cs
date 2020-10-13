@@ -19,6 +19,7 @@ namespace SpaceDust
       drawnFields = new List<ParticleField>();
       GameEvents.OnMapEntered.Add(new EventVoid.OnEvent(OnMapEntered));
       GameEvents.OnMapFocusChange.Add(new EventData<MapObject>.OnEvent( OnMapFocusChange));
+      GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(onGameSceneLoadRequested));
 
     }
     protected void OnDestroy()
@@ -26,7 +27,12 @@ namespace SpaceDust
       GameEvents.OnMapEntered.Remove(OnMapEntered);
       GameEvents.OnMapFocusChange.Remove(OnMapFocusChange);
     }
+    public void onGameSceneLoadRequested(GameScenes scenes)
+    {
 
+      Utils.Log($"[MapOverlay] Load Requested");
+      RemoveBodyFields();
+    }
     public void OnMapEntered()
     {
       Utils.Log($"[MapOverlay] Entering map view, focus on {PlanetariumCamera.fetch.target.name}");
@@ -56,9 +62,10 @@ namespace SpaceDust
     {
       foreach (ParticleField p in drawnFields)
       {
-        
+          if (state)
+          p.SetVisible(ToolbarUI.Instance.IsVisible(p.resName));
+        else
           p.SetVisible(state);
-        
       }
     }
 
@@ -110,7 +117,8 @@ namespace SpaceDust
 
         if (discovered || ided)
           field.CreateField(b, resourceName, discovered, ided, body.MapObject.transform.position);
-        
+
+        field.SetVisible(ToolbarUI.Instance.IsVisible(resourceName));
         drawnFields.Add(field);
 
      

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using KSP.Localization;
 
 namespace SpaceDust
@@ -40,6 +41,7 @@ namespace SpaceDust
     public string GenerateInfoString()
     {
       string msg = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Resource", Name);
+      msg += " ";
       switch (DiscoverMode)
       {
         case DiscoverMode.Local:
@@ -52,6 +54,7 @@ namespace SpaceDust
           msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Discovers_Altitude", (DiscoverRange/1000.0).ToString("F0"));
           break;
       }
+      msg += " ";
       switch (IdentifyMode)
       {
         case DiscoverMode.Local:
@@ -61,7 +64,7 @@ namespace SpaceDust
           msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Identifies_SOI");
           break;
         case DiscoverMode.Altitude:
-          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Identifies", (IdentifyRange / 1000.0).ToString("F0"));
+          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Identifies_Altitude", (IdentifyRange / 1000.0).ToString("F0"));
           break;
       }
 
@@ -80,6 +83,14 @@ namespace SpaceDust
     [KSPField(isPersistant = true)]
     public float PowerCost = 1f;
 
+    // Am i enabled?
+    [KSPField(isPersistant = false)]
+    public bool ScanInSpace = true;
+
+    // Am i enabled?
+    [KSPField(isPersistant = false)]
+    public bool ScanInAtmosphere = true;
+
     // Current cost to run the scanner
     [KSPField(isPersistant = true)]
     public float CurrentPowerConsumption = 1f;
@@ -90,6 +101,8 @@ namespace SpaceDust
 
 
 
+    [KSPField(isPersistant = false)]
+    public string ScanAnimationName;
 
     [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Event_EnableScanner", active = true)]
     public void EnableScanner()
@@ -103,6 +116,7 @@ namespace SpaceDust
     }
 
 
+    private AnimationState[] scanState;
     private List<ScannedResource> resources;
 
 
@@ -128,8 +142,35 @@ namespace SpaceDust
     public override void OnStart(StartState state)
     {
       base.OnStart(state);
-      if (HighLogic.LoadedSceneIsFlight)
+      if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
+        if (ScanAnimationName != "")
+        {
+          scanState = Utils.SetUpAnimation(ScanAnimationName, part);
+          if (Enabled)
+          {
+            foreach (AnimationState anim in scanState)
+            {
+              anim.speed = 0f;
+              anim.normalizedTime = 1f;
+            }
+          }
+          else
+          {
+            foreach (AnimationState anim in scanState)
+            {
+              anim.speed = 0f;
+              anim.normalizedTime = 0f;
+            }
+          }
+        }
+        if (resources == null || resources.Count == 0)
+        {
+          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
+              Single(c => part.partInfo.name == c.name).config.
+              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+          OnLoad(node);
+        }
 
       }
     }
@@ -159,6 +200,18 @@ namespace SpaceDust
       }
     }
 
+    public bool CheckScanSituation()
+    {
+      double atmDensity = vessel.atmDensity;
+      if (atmDensity > 0.00001)
+      {
+        return ScanInAtmosphere;
+      }
+      else
+      {
+        return ScanInSpace;
+      }
+    }
     void FixedUpdate()
     {
       if (HighLogic.LoadedSceneIsFlight)
@@ -167,103 +220,129 @@ namespace SpaceDust
         if (Enabled)
         {
           CurrentPowerConsumption = -PowerCost;
-          // check power
-          if (part.RequestResource(PartResourceLibrary.ElectricityHashcode,
-            (double)(PowerCost * TimeWarp.fixedDeltaTime)) >= (PowerCost * TimeWarp.fixedDeltaTime))
+          double amt = part.RequestResource(PartResourceLibrary.ElectricityHashcode,
+            (double)(PowerCost * TimeWarp.fixedDeltaTime));
+          if (!CheckScanSituation())
           {
-            // do scanning
-            for (int i = 0; i < resources.Count; i++)
-            {
-              double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
-                part.vessel.mainBody,
-                vessel.altitude,
-                vessel.latitude,
-                vessel.longitude);
-              // This mod discovers all bands at the body
-              if (resources[i].DiscoverMode == DiscoverMode.SOI)
-              {
-                SpaceDustScenario.Instance.DiscoverResourceBandsAtBody(resources[i].Name, vessel.mainBody);
-              }
-              // This mode discovers modes if we are close enough 
-              if (resources[i].DiscoverMode == DiscoverMode.Altitude)
-              {
-                List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
-                {
-                  foreach (ResourceBand band in bands)
-                  {
-                    if (band.CheckDistanceToCenter(vessel.altitude, resources[i].DiscoverRange))
-                    {
-                      SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band.name, vessel.mainBody);
-                    }
-                  }
-                }
-              }
-              // This mod discovers all bands at the body
-              if (resources[i].DiscoverMode == DiscoverMode.Local)
-              {
-                List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
-                {
-                  foreach (ResourceBand band in bands)
-                  {
-                    if (band.Sample(vessel.altitude, vessel.latitude, vessel.longitude) > resources[i].LocalThreshold)
-                    {
-                      SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band.name, vessel.mainBody);
-                    }
-                  }
-                }
-              }
-              // This mod discovers all bands at the body
-              if (resources[i].IdentifyMode == DiscoverMode.SOI)
-              {
-
-                SpaceDustScenario.Instance.IdentifyResourceBandsAtBody(resources[i].Name, vessel.mainBody);
-
-              }
-              // This mode discovers modes if we are close enough 
-              if (resources[i].IdentifyMode == DiscoverMode.Altitude)
-              {
-                List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
-                {
-                  foreach (ResourceBand band in bands)
-                  {
-                    if (band.CheckDistanceToCenter(vessel.altitude, resources[i].IdentifyRange))
-                    {
-                      SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band.name, vessel.mainBody);
-                    }
-                  }
-                }
-              }
-              // This mod discovers all bands at the body
-              if (resources[i].IdentifyMode == DiscoverMode.Local)
-              {
-                List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
-                {
-                  foreach (ResourceBand band in bands)
-                  {
-                    if (band.Sample(vessel.altitude, vessel.latitude, vessel.longitude) > resources[i].LocalThreshold)
-                    {
-                      SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band.name, vessel.mainBody);
-                    }
-                  }
-                }
-              }
-
-              if (message != "")
-                message += "\n";
-              message += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Resources_SingleSample", resources[i].Name, resourceSample.ToString("F2"));
-            }
-
+            message = "Cannot scan in this situation";
           }
           else
           {
-            message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Resources_NoPower");
+            // check power
+            if (amt > 0.00001)
+            {
+              // do scanning
+              for (int i = 0; i < resources.Count; i++)
+              {
+                double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
+                  part.vessel.mainBody,
+                  vessel.altitude+ part.vessel.mainBody.Radius,
+                  vessel.latitude,
+                  vessel.longitude);
+                //Utils.Log($"{resources[i].Name} at {part.vessel.mainBody}, alt: {vessel.altitude} lat: {vessel.latitude}, lon: {vessel.longitude}, sample: {resourceSample}");
+                // This mod discovers all bands at the body
+                if (resources[i].DiscoverMode == DiscoverMode.SOI)
+                {
+                  SpaceDustScenario.Instance.DiscoverResourceBandsAtBody(resources[i].Name, vessel.mainBody);
+                }
+                // This mode discovers modes if we are close enough 
+                if (resources[i].DiscoverMode == DiscoverMode.Altitude)
+                {
+                  List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
+                  {
+                    foreach (ResourceBand band in bands)
+                    {
+                      if (band.CheckDistanceToCenter(vessel.altitude, resources[i].DiscoverRange))
+                      {
+                        SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                      }
+                    }
+                  }
+                }
+                // This mod discovers all bands at the body
+                if (resources[i].DiscoverMode == DiscoverMode.Local)
+                {
+                  List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
+                  {
+                    foreach (ResourceBand band in bands)
+                    {
+                      if (band.Sample(vessel.altitude, vessel.latitude, vessel.longitude) > resources[i].LocalThreshold)
+                      {
+                        SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                      }
+                    }
+                  }
+                }
+                // This mod discovers all bands at the body
+                if (resources[i].IdentifyMode == DiscoverMode.SOI)
+                {
+
+                  SpaceDustScenario.Instance.IdentifyResourceBandsAtBody(resources[i].Name, vessel.mainBody);
+
+                }
+                // This mode discovers modes if we are close enough 
+                if (resources[i].IdentifyMode == DiscoverMode.Altitude)
+                {
+                  List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
+                  {
+                    foreach (ResourceBand band in bands)
+                    {
+                      if (band.CheckDistanceToCenter(vessel.altitude+ vessel.mainBody.Radius, resources[i].IdentifyRange))
+                      {
+                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                      }
+                    }
+                  }
+                }
+                // This mod discovers all bands at the body
+                if (resources[i].IdentifyMode == DiscoverMode.Local)
+                {
+                  List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
+                  {
+                    foreach (ResourceBand band in bands)
+                    {
+                      if (band.Sample(vessel.altitude, vessel.latitude, vessel.longitude) > resources[i].LocalThreshold)
+                      {
+                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                      }
+                    }
+                  }
+                }
+
+                if (message != "")
+                  message += "\n";
+                message += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Resources_SingleSample", resources[i].Name, resourceSample.ToString("G2"));
+              }
+
+            }
+            else
+            {
+              message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Resources_NoPower");
+            }
           }
 
+          if (ScanAnimationName != "")
+          {
+            foreach (AnimationState anim in scanState)
+            {
+              anim.speed = 1f;
+              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
+            }
+          }
         }
         else
         {
           CurrentPowerConsumption = 0f;
+
           message = Localizer.Format(("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Disabled"));
+          if (ScanAnimationName != "")
+          {
+            foreach (AnimationState anim in scanState)
+            {
+              anim.speed = -1f;
+              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
+            }
+          }
         }
         ScannerUI = message;
       }

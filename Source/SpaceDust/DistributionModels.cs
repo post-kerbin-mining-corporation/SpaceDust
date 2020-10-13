@@ -103,6 +103,7 @@ namespace SpaceDust
     public double maximumAltitude = 100000d;
     public double centerAltitude = 0d;
     public float altitudeVariability;
+    public double altitudeSquish = 0d;
     public FalloffType altitudeFalloff;
 
 
@@ -122,6 +123,7 @@ namespace SpaceDust
       node.TryGetValue("altUpperBound", ref maximumAltitude);
       node.TryGetValue("altPeak", ref centerAltitude);
       node.TryGetValue("altVariability", ref altitudeVariability);
+      node.TryGetValue("altitudeSquish", ref altitudeSquish);
       node.TryGetEnum<FalloffType>("altFalloffType", ref altitudeFalloff, FalloffType.None);
       node.TryGetEnum<FalloffType>("latFalloffType", ref latitudeFalloff, FalloffType.None);
     }
@@ -156,7 +158,8 @@ namespace SpaceDust
     public override double Sample(double altitude, double latitude, double longitude)
     {
 
-      double latFactor = CalculateLatFactor(90d - latitude);
+      //altitude = altitude * (altitudeSquish * Math.Cos(latitude * Mathf.Deg2Rad));
+      double latFactor = CalculateLatFactor(latitude);
       double altFactor = CalculateAltFactor(altitude);
 
       //Utils.Log($"{altitude}, {latitude}, {longitude}, {latFactor}, {altFactor}");
@@ -171,16 +174,18 @@ namespace SpaceDust
     /// <returns></returns>
     double CalculateAltFactor(double altitude)
     {
+      altitude -= BodyRadius;
       if (altitudeFalloff == FalloffType.Linear)
       {
-        if (altitude > (centerAltitude + BodyRadius))
-          return 1d - (altitude - (centerAltitude + BodyRadius)) / (maximumAltitude - (centerAltitude + BodyRadius));
+        if (altitude > centerAltitude)
+          return 1d - UtilMath.Clamp((altitude - centerAltitude) / (maximumAltitude - centerAltitude ), 0d, 1d);
         else
-          return 1d - (altitude - (centerAltitude + BodyRadius)) / (minimumAltitude - (centerAltitude + BodyRadius));
+          return 1d - UtilMath.Clamp( (altitude - centerAltitude) / (minimumAltitude - centerAltitude), 0d, 1d);
+       
       }
       else if (altitudeFalloff == FalloffType.None)
       {
-        if (altitude >= minimumAltitude + BodyRadius && altitude <= maximumAltitude + BodyRadius)
+        if (altitude >= minimumAltitude  && altitude <= maximumAltitude )
           return 1d;
         else
           return 0d;

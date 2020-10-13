@@ -19,6 +19,8 @@ namespace SpaceDust
 
     public List<ToolbarResourceElement> resourceEntries;
 
+    
+
     void Awake()
     {
       rect = this.transform as RectTransform;
@@ -57,7 +59,7 @@ namespace SpaceDust
       noneText.gameObject.SetActive(true);
     }
 
-    public void AddResourceEntry(string resourceName, bool discovered, bool identified)
+    public void AddResourceEntry(CelestialBody body, string resourceName, List<ResourceBand> bands, bool shown)
     {
       Utils.Log($"[ToolbarPanel]: Adding a new resource element for {resourceName}");
       noneText.gameObject.SetActive(false);
@@ -66,7 +68,9 @@ namespace SpaceDust
       newElement.transform.SetParent(resourceList);
       //newUIPanel.transform.localPosition = Vector3.zero;
       ToolbarResourceElement res = newElement.AddComponent<ToolbarResourceElement>();
-      res.SetResource(resourceName, discovered, identified);
+
+      res.SetResource(body, resourceName, bands, shown);
+
       resourceEntries.Add(res);
       Utils.Log($"[ToolbarPanel] Added a new resource entry for {resourceName}");
     }

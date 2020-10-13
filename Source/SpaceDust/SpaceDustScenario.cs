@@ -1,3 +1,4 @@
+using KSP.Localization;
 using System.Collections.Generic;
 
 namespace SpaceDust
@@ -47,6 +48,10 @@ namespace SpaceDust
       return node;
     }
 
+    public new string ToString()
+    {
+      return $"DiscoveryData(Band {BandName} around {BodyName} containing {ResourceName}: Discovered  = {Discovered},Identified = {Identified})";
+    }
   }
 
   [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER, GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.EDITOR)]
@@ -80,14 +85,16 @@ namespace SpaceDust
     {
       Utils.Log("[SpaceDustScenario]: Started Saving");
       base.OnSave(node);
-            
-      //if (distributionData != null)
-      //{
-      //  foreach (SpaceDustDiscoveryData data in distributionData)
-      //  {
-      //    node.AddNode(data.Save());
-      //  }
-      //}
+      
+      if (distributionData != null)
+      {
+        foreach (SpaceDustDiscoveryData data in distributionData)
+        {
+          //node.AddNode(data.Save());
+          //Utils.Log(data.ToString());
+        }
+      }
+      Utils.Log(node.ToString());
       Utils.Log("[SpaceDustScenario]: Done Saving");
     }
     public bool IsAnyDiscovered(string resourceName, CelestialBody b)
@@ -106,6 +113,8 @@ namespace SpaceDust
     }
     public bool IsDiscovered(string resourceName, string bandName,string bodyName)
     {
+      if (Settings.SetAllDiscovered)
+        return true;
       if (distributionData.Find(x => 
       (x.ResourceName == resourceName) &&
       (x.BandName == bandName) &&
@@ -116,6 +125,8 @@ namespace SpaceDust
     }
     public bool IsAnyIdentified(string resourceName, CelestialBody b)
     {
+      if (Settings.SetAllIdentified)
+        return true;
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
         if (IsIdentified(resourceName, band.name, b.bodyName))
@@ -130,6 +141,8 @@ namespace SpaceDust
     }
     public bool IsIdentified(string resourceName, string bandName, string bodyName)
     {
+      if (Settings.SetAllIdentified)
+        return true;
       if (distributionData.Find(x =>
       (x.ResourceName == resourceName) && 
       (x.BodyName == bodyName) &&
@@ -140,6 +153,7 @@ namespace SpaceDust
     }
     public void DiscoverResourceBandsAtBody(string resourceName, CelestialBody b)
     {
+    
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
 
@@ -169,6 +183,11 @@ namespace SpaceDust
           {
             data.Discovered = true;
           }
+        }
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+          ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Discovery", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
+          ScreenMessages.PostScreenMessage(msg);
         }
         Utils.Log($"[SpaceDustScenario]: Discovered {resourceName} in {bandName} at {bodyName}");
       }
@@ -205,6 +224,11 @@ namespace SpaceDust
             data.Discovered = true;
             data.Identified = true;
           }
+        }
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+          ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Identified", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
+          ScreenMessages.PostScreenMessage(msg);
         }
         Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {bandName} at {bodyName}");
       }

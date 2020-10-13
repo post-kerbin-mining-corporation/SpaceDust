@@ -25,6 +25,7 @@ namespace SpaceDust
     protected static ApplicationLauncherButton stockToolbarButton = null;
 
     // Data
+    Dictionary<string, bool> resourceVisibilities;
 
     protected virtual void Awake()
     {
@@ -37,6 +38,7 @@ namespace SpaceDust
         GameEvents.OnMapFocusChange.Add(new EventData<MapObject>.OnEvent(OnMapFocusChange));
         GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
       }
+      resourceVisibilities = new Dictionary<string, bool>();
       Instance = this;
     }
 
@@ -67,20 +69,37 @@ namespace SpaceDust
       }
     }
 
-    public void RefreshResources(CelestialBody b)
+    public void RefreshResources(CelestialBody body)
     {
       DestroyResources();
-      List<string> bodyResources = SpaceDustResourceMap.Instance.GetBodyResources(b);
+      List<string> bodyResources = SpaceDustResourceMap.Instance.GetBodyResources(body);
       if (bodyResources.Count > 0)
       {
         foreach (string res in bodyResources)
         {
-          if (SpaceDustScenario.Instance.IsAnyDiscovered(res, b))
-            toolbarPanel.AddResourceEntry(res, true, SpaceDustScenario.Instance.IsAnyIdentified(res, b));
+          if (!resourceVisibilities.ContainsKey(res))
+            resourceVisibilities.Add(res, false);
+
+          //if (SpaceDustScenario.Instance.IsAnyDiscovered(res, body))
+          //{
+            toolbarPanel.AddResourceEntry(body, res, SpaceDustResourceMap.Instance.GetBodyDistributions(body, res), resourceVisibilities[res]);
+          //}
         }
       }
     }
 
+    public void SetResourceVisible(string resourceName, bool shown)
+    {
+      if (resourceVisibilities.ContainsKey(resourceName))
+        resourceVisibilities[resourceName] = shown;
+    }
+    public bool IsVisible(string resourceName)
+    {
+      if (resourceVisibilities.ContainsKey(resourceName))
+        return resourceVisibilities[resourceName];
+
+      return false;
+    }
     protected void DestroyResources()
     {
       if (toolbarPanel != null)

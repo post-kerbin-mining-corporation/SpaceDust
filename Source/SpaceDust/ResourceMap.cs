@@ -17,7 +17,10 @@ namespace SpaceDust
     }
     protected void Start()
     {
-      SpaceDustResourceMap.Instance.Load();
+      Settings.Load();
+      if (HighLogic.LoadedSceneIsGame)
+
+        SpaceDustResourceMap.Instance.Load();
     }
   }
 
@@ -68,7 +71,10 @@ namespace SpaceDust
         for (int i = 0; i < Resources[body.name].Count; i++)
         {
           if (Resources[body.name][i].ResourceName == ResourceName)
+          {
             sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude);
+            //Utils.Log($"Sampled {ResourceName} of  {sampledTotal}");
+          }
         }
       }
       return sampledTotal;
@@ -82,12 +88,14 @@ namespace SpaceDust
     public List<string> GetBodyResources(CelestialBody body)
     {
       List<string> getResources = new List<string>();
-      if (body != null)
+      if (Resources != null && body != null)
       {
         if (Resources.ContainsKey(body.name))
         {
+          Utils.Log(body.name);
           for (int i = 0; i < Resources[body.name].Count; i++)
           {
+            Utils.Log(Resources[body.name][i].ResourceName);
             getResources.Add(Resources[body.name][i].ResourceName);
           }
         }

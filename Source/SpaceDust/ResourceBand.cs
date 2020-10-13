@@ -13,9 +13,14 @@ namespace SpaceDust
     public string ResourceName { get; private set; }
     public double Abundance { get; private set; }
 
+    public float ParticleCountScale { get; private set; }
+    public float ParticleRotateRate { get; private set; }
+
     public bool AlwaysDiscovered = false;
     public bool AlwaysIdentified = false;
 
+    float countScale = 1f;
+    float rotateRate = 1f;
     double minAbundance = 0d;
     double maxAbundance = 0d;
     bool useAirDensity = false;
@@ -32,6 +37,9 @@ namespace SpaceDust
       densityCurve = new FloatCurve();
       
       node.TryGetValue("name", ref name);
+      node.TryGetValue("countScale", ref countScale);
+      node.TryGetValue("rotateRate", ref rotateRate);
+
       node.TryGetValue("minAbundance", ref minAbundance);
       node.TryGetValue("maxAbundance", ref maxAbundance);
       node.TryGetValue("useAirDensity", ref useAirDensity);
@@ -40,6 +48,7 @@ namespace SpaceDust
       node.TryGetValue("alwaysIdentified", ref AlwaysIdentified);
 
       node.TryGetValue("distributionType", ref distName);
+
       if (useAirDensity)
       {
         densityCurve.Load(node.GetNode("densityCurve"));
@@ -55,6 +64,8 @@ namespace SpaceDust
 
     public void Initialize(string bodyName)
     {
+      ParticleCountScale = countScale;
+      ParticleRotateRate = rotateRate;
       /// Does game-time initializations
       Distribution.Initialize();
 
@@ -70,16 +81,15 @@ namespace SpaceDust
         }
       }
 
-      if (AlwaysDiscovered)
+      if (AlwaysDiscovered || Settings.SetAllDiscovered)
         SpaceDustScenario.Instance.DiscoverResourceBand( ResourceName, name, associatedBody);
-      if (AlwaysIdentified)
+      if (AlwaysIdentified || Settings.SetAllIdentified)
         SpaceDustScenario.Instance.IdentifyResourceBand( ResourceName, name, associatedBody);
-
-
     }
 
     public bool CheckDistanceToCenter(double testAltitude, double proximityThreshold)
     {
+      Utils.Log($"{testAltitude}, {Distribution.Center()}, {proximityThreshold}, {Math.Abs(testAltitude - Distribution.Center())}");
       if (Math.Abs(testAltitude - Distribution.Center()) < proximityThreshold)
         return true;
       return false;
@@ -90,12 +100,14 @@ namespace SpaceDust
     {
       double sampleResult = Abundance * Distribution.Sample(altitude, latitude, longitude);
 
+      //Utils.Log($"Looking at abundance {Abundance}, sampled {sampleResult}");
+
       if (useAirDensity)
-        sampleResult *= densityCurve.Evaluate((float)associatedBody.GetPressureAtm(altitude));
+        sampleResult *= densityCurve.Evaluate((float)associatedBody.GetPressureAtm(altitude - associatedBody.Radius));
 
       return sampleResult;
     }
-
+    
     /// TODO: Make me better
     public string ToString()
     {

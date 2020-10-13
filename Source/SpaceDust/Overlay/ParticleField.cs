@@ -19,6 +19,7 @@ namespace SpaceDust
     public ResourceBand resBand;
     Transform xform;
     float spinRate = 2f;
+    int targetCount = 1;
     void Awake()
     {
       xform = transform;
@@ -32,7 +33,7 @@ namespace SpaceDust
       main.simulationSpace = ParticleSystemSimulationSpace.Local;
       main.playOnAwake = false;
       main.loop = false;
-
+      main.maxParticles = Settings.particleFieldMaxParticleCount;
     
       particleColor = Color.white;
       particleField.gameObject.layer = 24 ;
@@ -42,17 +43,19 @@ namespace SpaceDust
     void FixedUpdate()
     {
       
-      if ( fieldGenerated)
+      if (fieldGenerated)
       {
         ticker += Time.fixedDeltaTime;
         if (ticker > 0.2f)
         {
           int numParticlesAlive = particleField.GetParticles(particleBuffer);
 
-          if (numParticlesAlive < Settings.particleFieldBaseCount)
+          if (numParticlesAlive < targetCount)
           {
-            List<ParticleSystem.Particle> newParticles = GenerateParticles(Settings.particleFieldBaseCount - numParticlesAlive);
-            particleBuffer.SetRange(newParticles, numParticlesAlive - 1);
+            
+            List<ParticleSystem.Particle> newParticles = GenerateParticles(targetCount - numParticlesAlive);
+            
+            particleBuffer.SetRange(newParticles, Mathf.Clamp(numParticlesAlive - 1, 0, numParticlesAlive -1));
             particleField.SetParticles(particleBuffer);
           }
           
@@ -93,8 +96,12 @@ namespace SpaceDust
       bool identified, 
       Vector3 scaledSpacePosition)
     {
+      targetCount = (int)(Mathf.Clamp(Settings.particleFieldBaseCount*band.ParticleCountScale,1f, Settings.particleFieldMaxParticleCount));
+      spinRate = band.ParticleRotateRate;
+
       resName = resourceName;
       resBand = band;
+      particleRenderer.maxParticleSize = Settings.particleFieldMaxViewportParticleScale;
       particleRenderer.material = new Material(Shader.Find(Settings.particleFieldShaderName));
       particleRenderer.material.mainTexture = (Texture)GameDatabase.Instance.GetTexture(Settings.particleFieldTextureUrl, false);
 
@@ -103,8 +110,8 @@ namespace SpaceDust
       else
         particleColor = Settings.resourceDiscoveredColor;
 
-      List<ParticleSystem.Particle> particles = GenerateParticles(Settings.particleFieldBaseCount);
-      particleField.SetParticles(particles.ToArray(), Settings.particleFieldBaseCount);
+      List<ParticleSystem.Particle> particles = GenerateParticles(targetCount);
+      particleField.SetParticles(particles.ToArray(), targetCount);
 
       particleBuffer = new ParticleSystem.Particle[particleField.main.maxParticles];
       fieldGenerated = true;
@@ -121,15 +128,15 @@ namespace SpaceDust
 
         Vector3 pos = UnityEngine.Random.insideUnitSphere * (float)resBand.Distribution.MaxSize() / ScaledSpace.ScaleFactor;
         Vector3 sphericalPos = Cart2Sphere(new Vector3(pos.z, pos.x, pos.y));
-        float sampled = (float)resBand.Distribution.Sample(sphericalPos.x* ScaledSpace.ScaleFactor, sphericalPos.z * Mathf.Rad2Deg, sphericalPos.y * Mathf.Rad2Deg);
+        float sampled = (float)resBand.Distribution.Sample(sphericalPos.x* ScaledSpace.ScaleFactor, 90d - sphericalPos.z * Mathf.Rad2Deg, sphericalPos.y * Mathf.Rad2Deg);
         
-        if (sampled >= 0.001f)
+        if (sampled >= 0.0001f)
         {
           ParticleSystem.Particle p = new ParticleSystem.Particle();
           p.position = pos;
-          
-          p.startColor = new Color(particleColor.r, particleColor.g, particleColor.b, sampled*0.5f);
-          p.startSize = Settings.particleFieldBaseSize*Mathf.Clamp01(sampled*2f);
+          float scaled = (Mathf.Log10(sampled) + 8f) / 10;
+          p.startColor = new Color(particleColor.r, particleColor.g, particleColor.b, scaled*0.25f);
+          p.startSize = Settings.particleFieldBaseSize* scaled*20;
           p.startLifetime = UnityEngine.Random.Range(25f, 50f);
           p.remainingLifetime = UnityEngine.Random.Range(25, 50f);
           p.rotation = UnityEngine.Random.Range(0f,360f);
