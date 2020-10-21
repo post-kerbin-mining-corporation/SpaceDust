@@ -39,6 +39,9 @@ namespace SpaceDust
       ["LqdHe3"] = new Color(0.313f, 0.388f, 0.38f),
       ["LqdDeuterium"] = new Color(1f, 0.69f, 1f)
     };
+
+    public static List<string> visibleResources;
+
     public static Color GetResourceColor(string resourceName)
     {
       if (Settings.resourceColors.ContainsKey(resourceName))
@@ -92,6 +95,9 @@ namespace SpaceDust
             resourceColors.Add(defn.name, UnityEngine.Random.ColorHSV());
           }
         }
+
+        ConfigNode shownNodes = settingsNode.GetNode("ResourceVisibilities");
+        visibleResources = shownNodes.GetValuesList("name");
       }
       else
       {

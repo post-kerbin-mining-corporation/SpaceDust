@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-
+using KSP.Localization;
 
 namespace SpaceDust.Overlay
 {
@@ -16,8 +16,8 @@ namespace SpaceDust.Overlay
     public Text bandName;
     public Text concentration;
 
-    ResourceBand associatedBand;
-    CelestialBody associatedBody;
+    public ResourceBand associatedBand;
+    public CelestialBody associatedBody;
 
     void Awake()
     {
@@ -53,16 +53,16 @@ namespace SpaceDust.Overlay
       {
         bandName.enabled = true;
         concentration.enabled = true;
-        bandName.text = bnd.name;
-        concentration.text = String.Format("{0} u/m³", bnd.Abundance.ToString("G3"));
+        bandName.text = bnd.title;
+        concentration.text = Localizer.Format("#LOC_SpaceDust_UI_BandData", bnd.Abundance.ToString("G3"));
       }
       else if (SpaceDustScenario.Instance.IsDiscovered(bnd.ResourceName, bnd.name, body))
       {
 
         bandName.enabled = true;
         concentration.enabled = true;
-        bandName.text = bnd.name;
-        concentration.text = "unknown";
+        bandName.text = bnd.title;
+        concentration.text = Localizer.Format("#LOC_SpaceDust_UI_UnknownBand");
       }
       else
       {

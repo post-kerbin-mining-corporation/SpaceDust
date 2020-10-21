@@ -72,6 +72,9 @@ namespace SpaceDust
     public String HarvestAnimationName;
 
     [KSPField(isPersistant = false)]
+    public String LoopAnimationName;
+
+    [KSPField(isPersistant = false)]
     public String HeatModuleName;
 
 
@@ -102,6 +105,7 @@ namespace SpaceDust
     protected List<HarvestedResource> resources;
     protected Transform HarvestIntakeTransform;
     private AnimationState[] harvestState;
+    private AnimationState[] loopState;
     private IScalarModule scalarHeatModule;
 
     public override string GetModuleDisplayName()
@@ -112,7 +116,7 @@ namespace SpaceDust
     public override string GetInfo()
     {
       string msg = "";
-      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header", HarvestType.ToString(), IntakeSpeedStatic.ToString("F1"));
+      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header", HarvestType.ToString(), IntakeSpeedStatic.ToString("F1"), PowerCost.ToString("F1"));
 
       foreach (HarvestedResource res in resources)
       {
@@ -128,9 +132,13 @@ namespace SpaceDust
       {
         HarvestIntakeTransform = part.FindModelTransform(HarvestIntakeTransformName);
       }
+      if (LoopAnimationName != "")
+        loopState = Utils.SetUpAnimation(LoopAnimationName, part);
+
       if (HarvestAnimationName != "")
       {
         harvestState = Utils.SetUpAnimation(HarvestAnimationName, part);
+        
         if (Enabled)
         {
           foreach (AnimationState anim in harvestState)
@@ -181,6 +189,22 @@ namespace SpaceDust
         {
           Events["DisableHarvester"].active = Enabled;
           Events["EnableHarvester"].active = !Enabled;
+        }
+        if (Enabled && LoopAnimationName != "")
+        {
+          foreach (AnimationState anim in loopState)
+          {
+            anim.wrapMode = WrapMode.Loop;
+            anim.speed = 1f;
+          }
+        }
+        else if (LoopAnimationName != "")
+        {
+          foreach (AnimationState anim in loopState)
+          {
+            anim.wrapMode = WrapMode.Loop;
+            anim.speed = 0f;
+          }
         }
       }
     }
@@ -262,9 +286,8 @@ namespace SpaceDust
           intakeVector = HarvestIntakeTransform.forward;
 
         double dot = Vector3d.Dot(worldVelocity, intakeVector);
-        float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) + IntakeSpeedStatic) * IntakeArea;
-        IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", Utils.ToSI(intakeVolume, "G1"));
-        efficiencyMultiplier = IntakeVelocityScale.Evaluate((float)mach);
+        float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) * IntakeVelocityScale.Evaluate((float)mach) + IntakeSpeedStatic) * IntakeArea;
+        IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", Utils.ToSI(intakeVolume, "G2"));
         ScoopUI = "";
   
         for (int i = 0; i < resources.Count; i++)
@@ -277,8 +300,8 @@ namespace SpaceDust
 
           if (resourceSample > resources[i].MinHarvestValue)
           {
-            double resAmt = resourceSample * intakeVolume * resources[i].BaseEfficiency * efficiencyMultiplier;
-            ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
+            double resAmt = resourceSample * intakeVolume * resources[i].BaseEfficiency;
+            ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
           

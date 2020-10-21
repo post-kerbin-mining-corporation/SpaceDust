@@ -9,7 +9,7 @@ using UnityEngine;
 namespace SpaceDust
 {
   [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
-  public class ToolbarUI:MonoBehaviour
+  public class ToolbarUI : MonoBehaviour
   {
     public static ToolbarUI Instance { get; private set; }
     // Control Vars
@@ -42,7 +42,7 @@ namespace SpaceDust
       Instance = this;
     }
 
-  
+
 
     public void OnMapEntered()
     {
@@ -77,13 +77,13 @@ namespace SpaceDust
       {
         foreach (string res in bodyResources)
         {
-          if (!resourceVisibilities.ContainsKey(res))
-            resourceVisibilities.Add(res, false);
+          if (Settings.visibleResources.Contains(res))
+          {
+            if (!resourceVisibilities.ContainsKey(res))
+              resourceVisibilities.Add(res, false);
 
-          //if (SpaceDustScenario.Instance.IsAnyDiscovered(res, body))
-          //{
             toolbarPanel.AddResourceEntry(body, res, SpaceDustResourceMap.Instance.GetBodyDistributions(body, res), resourceVisibilities[res]);
-          //}
+          }
         }
       }
     }
@@ -108,7 +108,7 @@ namespace SpaceDust
 
     public void Start()
     {
-      
+
       if (ApplicationLauncher.Ready)
         OnGUIAppLauncherReady();
 
@@ -154,7 +154,7 @@ namespace SpaceDust
 
         if (HighLogic.LoadedSceneIsFlight)
         {
-          
+
           toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width, toolbarPanel.rect.rect.height, 0f);
         }
       }
@@ -196,7 +196,7 @@ namespace SpaceDust
             DummyVoid,
             DummyVoid,
             DummyVoid,
-            ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION | ApplicationLauncher.AppScenes.FLIGHT,
+            ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
             (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
       CreateToolbarPanel();
@@ -215,7 +215,7 @@ namespace SpaceDust
 
     protected void OnGUIAppLauncherUnreadifying(GameScenes scene)
     {
-      
+
 
       DestroyToolbarPanel();
     }

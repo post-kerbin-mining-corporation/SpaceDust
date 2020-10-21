@@ -11,6 +11,8 @@ namespace SpaceDust
     public string BandName = "noBand";
     public bool Discovered = false;
     public bool Identified = false;
+    public float discoveryPercent = 0f;
+    public float identifyPercent = 0f;
 
 
     public SpaceDustDiscoveryData()
@@ -22,7 +24,13 @@ namespace SpaceDust
       BandName = bandName;
       Discovered = isDiscovered;
       Identified = isIdentified;
+      if (isDiscovered)
+        discoveryPercent = 100f;
+      if (isIdentified)
+        identifyPercent = 100f;
     }
+
+
     public SpaceDustDiscoveryData(ConfigNode node)
     {
       Load(node);
@@ -34,6 +42,8 @@ namespace SpaceDust
       node.TryGetValue("bandName", ref BandName);
       node.TryGetValue("discovered", ref Discovered);
       node.TryGetValue("identified", ref Identified);
+      node.TryGetValue("discoveryPercent", ref discoveryPercent);
+      node.TryGetValue("identifyPercent", ref identifyPercent);
     }
 
     public ConfigNode Save()
@@ -45,12 +55,14 @@ namespace SpaceDust
       node.AddValue("bandName", BandName);
       node.AddValue("discovered", Discovered);
       node.AddValue("identified", Identified);
+      node.AddValue("discoveryPercent", discoveryPercent);
+      node.AddValue("identifyPercent", identifyPercent);
       return node;
     }
 
     public new string ToString()
     {
-      return $"DiscoveryData(Band {BandName} around {BodyName} containing {ResourceName}: Discovered  = {Discovered},Identified = {Identified})";
+      return $"DiscoveryData(Band {BandName} around {BodyName} containing {ResourceName}: Discovered  = {discoveryPercent}% ({Discovered}),Identified = {identifyPercent}% ({Identified}))";
     }
   }
 
@@ -85,7 +97,7 @@ namespace SpaceDust
     {
       Utils.Log("[SpaceDustScenario]: Started Saving");
       base.OnSave(node);
-      
+
       if (distributionData != null)
       {
         foreach (SpaceDustDiscoveryData data in distributionData)
@@ -105,20 +117,20 @@ namespace SpaceDust
           return true;
       }
       return false;
-       
+
     }
     public bool IsDiscovered(string resourceName, string bandName, CelestialBody b)
     {
       return IsDiscovered(resourceName, bandName, b.bodyName);
     }
-    public bool IsDiscovered(string resourceName, string bandName,string bodyName)
+    public bool IsDiscovered(string resourceName, string bandName, string bodyName)
     {
       if (Settings.SetAllDiscovered)
         return true;
-      if (distributionData.Find(x => 
+      if (distributionData.Find(x =>
       (x.ResourceName == resourceName) &&
       (x.BandName == bandName) &&
-      (x.BodyName == bodyName) && 
+      (x.BodyName == bodyName) &&
       x.Discovered) == null)
         return false;
       return true;
@@ -144,19 +156,18 @@ namespace SpaceDust
       if (Settings.SetAllIdentified)
         return true;
       if (distributionData.Find(x =>
-      (x.ResourceName == resourceName) && 
+      (x.ResourceName == resourceName) &&
       (x.BodyName == bodyName) &&
       (x.BandName == bandName) &&
       x.Identified) == null)
         return false;
       return true;
     }
+
     public void DiscoverResourceBandsAtBody(string resourceName, CelestialBody b)
     {
-    
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
-
         DiscoverResourceBand(resourceName, band.name, b.bodyName);
       }
     }
@@ -168,7 +179,7 @@ namespace SpaceDust
     {
       if (!IsDiscovered(resourceName, bandName, bodyName))
       {
-        List<SpaceDustDiscoveryData> toDiscover = distributionData.FindAll(x => 
+        List<SpaceDustDiscoveryData> toDiscover = distributionData.FindAll(x =>
         (x.ResourceName == resourceName) &&
         (x.BandName == bandName) &&
         (x.BodyName == bodyName));
@@ -182,6 +193,7 @@ namespace SpaceDust
           foreach (SpaceDustDiscoveryData data in toDiscover)
           {
             data.Discovered = true;
+            data.discoveryPercent = 100;
           }
         }
         if (HighLogic.LoadedSceneIsFlight)
@@ -222,7 +234,9 @@ namespace SpaceDust
           foreach (SpaceDustDiscoveryData data in toIdentify)
           {
             data.Discovered = true;
+            data.discoveryPercent = 100;
             data.Identified = true;
+            data.identifyPercent = 100;
           }
         }
         if (HighLogic.LoadedSceneIsFlight)
@@ -232,6 +246,131 @@ namespace SpaceDust
         }
         Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {bandName} at {bodyName}");
       }
+    }
+
+    public void AddDiscoveryAtBody(string resourceName, CelestialBody b, float amount)
+    {
+      foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
+      {
+        AddDiscoveryAtBand(resourceName, band.name, b.bodyName, amount);
+      }
+    }
+    public void AddDiscoveryAtBand(string resourceName, string bandName, CelestialBody b, float amount)
+    {
+      AddDiscoveryAtBand(resourceName, bandName, b.bodyName, amount);
+    }
+    public void AddDiscoveryAtBand(string resourceName, string bandName, string bodyName, float amount)
+    {
+      if (!IsDiscovered(resourceName, bandName, bodyName))
+      {
+        List<SpaceDustDiscoveryData> toDiscover = distributionData.FindAll(x =>
+        (x.ResourceName == resourceName) &&
+        (x.BandName == bandName) &&
+        (x.BodyName == bodyName));
+
+        if (toDiscover == null || toDiscover.Count == 0)
+        {
+          distributionData.Add(new SpaceDustDiscoveryData(resourceName, bandName, bodyName, false, false));
+
+        }
+        else
+        {
+          foreach (SpaceDustDiscoveryData data in toDiscover)
+          {
+            data.discoveryPercent += amount;
+            Utils.Log($"{data.discoveryPercent}");
+            if (data.discoveryPercent >= 100f)
+            {
+              DiscoverResourceBand(resourceName, bandName, bodyName);
+            }
+          }
+        }
+      }
+    }
+    public void AddIdentifyAtBody(string resourceName, CelestialBody b, float amount)
+    {
+      foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
+      {
+
+        AddIdentifyAtBand(resourceName, band.name, b.bodyName, amount);
+      }
+    }
+    public void AddIdentifyAtBand(string resourceName, string bandName, CelestialBody b, float amount)
+    {
+      AddIdentifyAtBand(resourceName, bandName, b.bodyName, amount);
+    }
+    public void AddIdentifyAtBand(string resourceName, string bandName, string bodyName, float amount)
+    {
+      if (!IsIdentified(resourceName, bandName, bodyName))
+      {
+        List<SpaceDustDiscoveryData> toIdentify = distributionData.FindAll(x =>
+        (x.ResourceName == resourceName) &&
+        (x.BandName == bandName) &&
+        (x.BodyName == bodyName));
+
+        if (toIdentify == null || toIdentify.Count == 0)
+        {
+          distributionData.Add(new SpaceDustDiscoveryData(resourceName, bandName, bodyName, true, true));
+        }
+        else
+        {
+          foreach (SpaceDustDiscoveryData data in toIdentify)
+          {
+            if (data.Discovered)
+            {
+              data.identifyPercent += amount;
+              Utils.Log($"{data.identifyPercent}");
+            }
+            if (data.identifyPercent >= 100f)
+            {
+              IdentifyResourceBand(resourceName, bandName, bodyName);
+            }
+          }
+        }
+
+      }
+    }
+
+    public float GetSurveyProgressAtBody(string resourceName, CelestialBody b)
+    {
+      float maxProgress = 0f;
+      float progress = 0f;
+      foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
+      {
+        maxProgress += 200f;
+        progress += GetBandSurveyProgress(resourceName, band.name, b.bodyName);
+      }
+      if (maxProgress > 0)
+        return 100f;
+      return progress/maxProgress * 100f;
+    }
+
+    public float GetBandSurveyProgress(string resourceName, string bandName, string bodyName)
+    {
+
+      List<SpaceDustDiscoveryData> toEval = distributionData.FindAll(x =>
+      (x.ResourceName == resourceName) &&
+      (x.BandName == bandName) &&
+      (x.BodyName == bodyName));
+
+      if (toEval == null || toEval.Count == 0)
+      {
+        return 0f;
+      }
+      else
+      {
+        foreach (SpaceDustDiscoveryData data in toEval)
+        {
+          return data.identifyPercent+ data.discoveryPercent;
+        }
+      }
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Identified", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
+        ScreenMessages.PostScreenMessage(msg);
+      }
+      Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {bandName} at {bodyName}");
+      return 0f;
     }
   }
 }

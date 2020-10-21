@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using KSP.Localization;
 
 namespace SpaceDust
 {
@@ -10,6 +11,7 @@ namespace SpaceDust
   {
 
     public string name = "GenericBand";
+    public string title = "GenericBand";
     public string ResourceName { get; private set; }
     public double Abundance { get; private set; }
 
@@ -37,6 +39,7 @@ namespace SpaceDust
       densityCurve = new FloatCurve();
       
       node.TryGetValue("name", ref name);
+      node.TryGetValue("title", ref title);
       node.TryGetValue("countScale", ref countScale);
       node.TryGetValue("rotateRate", ref rotateRate);
 
@@ -49,6 +52,8 @@ namespace SpaceDust
 
       node.TryGetValue("distributionType", ref distName);
 
+      title = Localizer.Format(title);
+
       if (useAirDensity)
       {
         densityCurve.Load(node.GetNode("densityCurve"));
@@ -56,9 +61,9 @@ namespace SpaceDust
 
       if (distName == "Uniform")
         Distribution = new UniformDistributionModel(node) as DistributionModel;
+
       if (distName == "Spherical")
         Distribution = new SphericalDistributionModel(node) as DistributionModel;
-      
       
     }
 

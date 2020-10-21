@@ -85,7 +85,8 @@ namespace SpaceDust
       List<string> bodyResources = SpaceDustResourceMap.Instance.GetBodyResources(targetObject);
       foreach (string resName in bodyResources)
       {
-        GenerateBodyField(resName, targetObject);
+        if (Settings.visibleResources.Contains(resName))
+          GenerateBodyField(resName, targetObject);
       }
     }
 

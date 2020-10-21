@@ -129,7 +129,7 @@ namespace SpaceDust
     public override string GetInfo()
     {
       string msg = "";
-      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Header");
+      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Header", PowerCost.ToString("F1"));
 
       foreach (ScannedResource res in resources)
       {

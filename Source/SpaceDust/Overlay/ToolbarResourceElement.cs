@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using KSP.Localization;
 
 namespace SpaceDust
 {
@@ -17,8 +18,6 @@ namespace SpaceDust
     public Text resourceName;
 
     public List<BandResourceElement> bandWidgets;
-
-    bool identifiedResource = false;
     string resName = "";
 
     void Awake()
@@ -49,9 +48,10 @@ namespace SpaceDust
     {
       MapOverlay.Instance.SetResourceVisible(resName, visibleToggle.isOn);
       ToolbarUI.Instance.SetResourceVisible(resName, visibleToggle.isOn);
+
       foreach (BandResourceElement wdget in bandWidgets)
       {
-        if (identifiedResource)
+        if (SpaceDustScenario.Instance.IsIdentified(resName, wdget.associatedBand.name, wdget.associatedBody))
           wdget.SetVisible(visibleToggle.isOn);
         else
           wdget.SetVisible(false);
@@ -63,15 +63,8 @@ namespace SpaceDust
       if (resourceColor == null) FindElements();
 
       resName = ResourceName;
-
       bool anyID = SpaceDustScenario.Instance.IsAnyIdentified(ResourceName, body);
-      bool anyDiscover = SpaceDustScenario.Instance.IsAnyDiscovered(ResourceName, body);
-      foreach (ResourceBand band in bands)
-      {
-       
-      }
-
-      
+      bool anyDiscover = SpaceDustScenario.Instance.IsAnyDiscovered(ResourceName, body);      
       resourceColor.enabled = anyID;
 
 
@@ -83,11 +76,11 @@ namespace SpaceDust
       else if (anyDiscover)
       {
         resourceColor.color = Settings.resourceDiscoveredColor;
-        resourceName.text = "?";
+        resourceName.text = Localizer.Format("#LOC_SpaceDust_UI_UnknownResource");
       }
       else
       {
-        
+        SetVisible(false);
       }
       foreach( ResourceBand b in bands)
       {

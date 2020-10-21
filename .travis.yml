@@ -25,10 +25,10 @@ deploy:
     access_key_id: $AWS_ACCESS_KEY_ID
     secret_access_key: $AWS_SECRET_ACCESS_KEY
     bucket: "nertea-ksp-modding-releases"
-    local_dir: deploy/HeatControl
+    local_dir: deploy/SpaceDust
     skip_cleanup: true
     acl: public_read
     region: us-east-2
-    upload-dir: heat-control
+    upload-dir: space-dust
     on:
       branch: master
