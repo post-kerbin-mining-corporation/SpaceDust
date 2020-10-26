@@ -19,8 +19,10 @@ namespace SpaceDust
     {
       Settings.Load();
       if (HighLogic.LoadedSceneIsGame)
-
+      {
+        SpaceDustInstruments.Instance.Load();
         SpaceDustResourceMap.Instance.Load();
+      }
     }
   }
 
@@ -72,7 +74,7 @@ namespace SpaceDust
         {
           if (Resources[body.name][i].ResourceName == ResourceName)
           {
-            sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude);
+            sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude)/PartResourceLibrary.Instance.GetDefinition(ResourceName).density;
             //Utils.Log($"Sampled {ResourceName} of  {sampledTotal}");
           }
         }
@@ -92,10 +94,8 @@ namespace SpaceDust
       {
         if (Resources.ContainsKey(body.name))
         {
-          Utils.Log(body.name);
           for (int i = 0; i < Resources[body.name].Count; i++)
           {
-            Utils.Log(Resources[body.name][i].ResourceName);
             getResources.Add(Resources[body.name][i].ResourceName);
           }
         }

@@ -8,6 +8,37 @@ using System.Security.Permissions;
 namespace SpaceDust
 {
 
+  public class InstrumentSlot
+  {
+    public string SlotName;
+    public string InstrumentName = "None";
+
+
+    public SpaceDustInstrument Instrument;
+    public InstrumentSlot(ConfigNode node)
+    {
+      node.TryGetValue("name", ref SlotName);
+      node.TryGetValue("Instrument", ref InstrumentName);
+      if (InstrumentName != "None")
+      Instrument = SpaceDustInstruments.Instance.GetInstrument(InstrumentName);
+    }
+    public InstrumentSlot(string name, string inst)
+    {
+      SlotName = name;
+      InstrumentName = inst;
+      if (InstrumentName != "None")
+        Instrument = SpaceDustInstruments.Instance.GetInstrument(InstrumentName);
+    }
+
+    public ConfigNode Save()
+    {
+      ConfigNode c = new ConfigNode("SLOT");
+      c.AddValue("name", SlotName);
+      c.AddValue("Instrument", InstrumentName);
+      return c;
+    }
+  }
+
   public class ModuleSpaceDustTelescope : PartModule
   {
     // Am i enabled?
@@ -37,7 +68,26 @@ namespace SpaceDust
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Title")]
     public string ScannerUI = "";
 
+    // UI field for showing scan status
+    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_None")]
+    public string InstrumentUI_1 = "";
+    // UI field for showing scan status
+    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_None")]
+    public string InstrumentUI_2 = "";
+    // UI field for showing scan status
+    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_None")]
+    public string InstrumentUI_3 = "";
+    // UI field for showing scan status
+    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_None")]
 
+    public string InstrumentUI_4 = "";
+    // Size of the lens
+    [KSPField(isPersistant = false)]
+    public double ObjectiveDiameter = 1.8d;
+
+    // Size of the lens
+    [KSPField(isPersistant = false)]
+    public double FieldOfView = 1.8d;
 
     [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Event_EnableTelescope", active = true)]
     public void EnableTelescope()
@@ -52,7 +102,7 @@ namespace SpaceDust
 
 
     private AnimationState[] scanState;
-    private List<ModuleSpaceDustTelescopeSlot> instrumentSlots;
+    private List<InstrumentSlot> instrumentSlots;
 
     public override string GetModuleDisplayName()
     {
@@ -62,23 +112,75 @@ namespace SpaceDust
     public override string GetInfo()
     {
       string msg = "";
-      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Info_Header", PowerCost.ToString("F1"));
+      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Info_Header", PowerCost.ToString("F1"), (Mathf.Rad2Deg*FieldOfView).ToString("F2"), ObjectiveDiameter.ToString("F1"));
 
       return msg;
     }
+    public override void OnLoad(ConfigNode node)
+    {
+      base.OnLoad(node);
+      if (instrumentSlots == null) instrumentSlots = new List<InstrumentSlot>();
 
+
+      foreach (ConfigNode resNode in node.GetNodes("SLOT"))
+      {
+        InstrumentSlot newSlot = new InstrumentSlot(resNode);
+        // If a slot with this name exists, replace it, else create it
+        if (instrumentSlots.FirstOrDefault(x => newSlot.SlotName == x.SlotName) != null)
+        {
+          instrumentSlots[instrumentSlots.IndexOf(instrumentSlots.Find(x => newSlot.SlotName == x.SlotName))] = newSlot;
+        }
+        else
+        {
+          instrumentSlots.Add(newSlot);
+        }
+      }
+      for (int i = 0; i < instrumentSlots.Count; i++)
+      {
+        if (instrumentSlots[i].Instrument != null)
+        {
+          Fields[$"InstrumentUI_{i + 1}"].guiName = instrumentSlots[i].Instrument.Title;
+        }
+
+      }
+    }
+
+    public override void OnSave(ConfigNode node)
+    {
+      base.OnSave(node);
+      for (int i = 0; i < instrumentSlots.Count; i++)
+      {
+        node.AddNode(instrumentSlots[i].Save());
+      }
+
+    }
     public override void OnAwake()
     {
       base.OnAwake();
-      instrumentSlots = new List<ModuleSpaceDustTelescopeSlot>();
+      
     }
-    public override void OnStart(StartState state)
+    public void Start()
     {
-      base.OnStart(state);
 
-      instrumentSlots = this.GetComponentsInChildren<ModuleSpaceDustTelescopeSlot>().ToList();
+
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
+        if (instrumentSlots == null || instrumentSlots.Count == 0)
+        {
+          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
+              Single(c => part.partInfo.name == c.name).config.
+              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+          OnLoad(node);
+        }
+
+        for (int i = 0; i < instrumentSlots.Count; i++)
+        {
+          if (instrumentSlots[i].Instrument != null)
+          {
+            Fields[$"InstrumentUI_{i + 1}"].guiName = instrumentSlots[i].Instrument.Title;
+          }
+
+        }
         if (ScanAnimationName != "")
         {
           scanState = Utils.SetUpAnimation(ScanAnimationName, part);
@@ -116,6 +218,16 @@ namespace SpaceDust
         }
       }
     }
+    void SetScanUI(bool on)
+    {
+      for (int i = 0; i < instrumentSlots.Count; i++)
+      {
+        if (instrumentSlots[i].Instrument != null)
+          Fields[$"InstrumentUI_{i+1}"].guiActive = on;
+        else
+          Fields[$"InstrumentUI_{i + 1}"].guiActive = false;
+      }
+    }
     void FixedUpdate()
     {
       if (HighLogic.LoadedSceneIsFlight)
@@ -136,39 +248,45 @@ namespace SpaceDust
               {
                 CelestialBody targetBody;
                 targetBody = (CelestialBody)target;
+                Target = targetBody.name;
                 // do scanning
                 ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Observing", part.vessel.targetObject.GetDisplayName());
-
+                SetScanUI(true);
                 for (int i = 0; i < instrumentSlots.Count; i++)
                 {
-                  instrumentSlots[i].SetUIState(true);
-                  instrumentSlots[i].Scan((CelestialBody)part.vessel.targetObject);
-
+                  if (instrumentSlots[i].Instrument != null)
+                  {
+                    
+                    string response = instrumentSlots[i].Instrument.Scan(part.vessel, (CelestialBody)part.vessel.targetObject, ObjectiveDiameter, FieldOfView, TimeWarp.fixedDeltaTime);
+                    Fields[$"InstrumentUI_{i + 1}"].SetValue(response, this);
+                  }
+                  
                 }
 
               }
               catch (InvalidCastException)
               {
-                for (int i = 0; i < instrumentSlots.Count; i++)
-                {
-                  instrumentSlots[i].SetUIState(false);
-                }
+                Target = ""; 
+                SetScanUI(false);
                 ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoTarget");
               }
 
             }
             else
             {
-              for (int i = 0; i < instrumentSlots.Count; i++)
-              {
-                instrumentSlots[i].SetUIState(false);
-              }
+              Target = "";
+              SetScanUI(false);
               ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoTarget");
             }
 
           }
+          else
+          {
+            Target = "";
+            SetScanUI(false);
+            ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoPower");
 
-
+          }
           if (ScanAnimationName != "")
           {
             foreach (AnimationState anim in scanState)
@@ -178,25 +296,12 @@ namespace SpaceDust
             }
           }
 
-          else
-          {
-            for (int i = 0; i < instrumentSlots.Count; i++)
-            {
-              instrumentSlots[i].SetUIState(false);
-            }
-            ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoPower");
-
-          }
-
         }
         else
         {
           CurrentPowerConsumption = 0f;
           ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Disabled");
-          for (int i = 0; i < instrumentSlots.Count; i++)
-          {
-            instrumentSlots[i].SetUIState(false);
-          }
+          SetScanUI(false);
           if (ScanAnimationName != "")
           {
             foreach (AnimationState anim in scanState)
@@ -210,88 +315,4 @@ namespace SpaceDust
     }
   }
 
-  public class ModuleSpaceDustTelescopeSlot : PartModule
-  {
-
-    // Cost per second to run the telescope
-    [KSPField(isPersistant = false)]
-    public float PowerCost = 1f;
-
-    [KSPField(isPersistant = false)]
-    public string ResourceName = "";
-
-    [KSPField(isPersistant = false)]
-    public string slotID = "";
-
-    [KSPField(isPersistant = false)]
-    public string InstrumentName = "";
-
-    [KSPField(isPersistant = false)]
-    public bool Discovers = true;
-
-    [KSPField(isPersistant = false)]
-    public bool Identifies = true;
-
-    [KSPField(isPersistant = false)]
-    public double MaxRange = 50000000000d;
-
-    [KSPField(isPersistant = false)]
-    public double DiscoverRate = 1d;
-
-    [KSPField(isPersistant = false)]
-    public double IdentifyRate = 1d;
-
-    // UI field for showing scan status
-    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_Title")]
-    public string ScannerUI = "";
-
-    //public override string GetModuleDisplayName()
-    //{
-    //  return Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Instrument_DisplayName");
-    //}
-
-    //public override string GetInfo()
-    //{
-    //  string msg = "";
-    //  msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Instrument_Info");
-
-    //  return msg;
-   // }
-
-    public void SetUIState(bool state)
-    {
-      if (ResourceName != "" || ResourceName != "None")
-      {
-        Fields["ScannerUI"].guiActive = state;
-        Fields["ScannerUI"].guiName = Localizer.Format(InstrumentName);
-      }
-      else
-      {
-        Fields["ScannerUI"].guiActive = false;
-      }
-    }
-
-    public void Scan(CelestialBody targetBody)
-    {
-      double dist = Vector3d.Distance(part.vessel.GetWorldPos3D(), targetBody.position);
-      if (dist > MaxRange)
-        ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_OutOfRange", targetBody.bodyDisplayName);
-      else
-      {
-        if (Discovers)
-        {
-          SpaceDustScenario.Instance.AddDiscoveryAtBody(ResourceName, targetBody, (float)DiscoverRate * TimeWarp.fixedDeltaTime);
-        }
-        if (Identifies)
-        {
-          SpaceDustScenario.Instance.AddIdentifyAtBody(ResourceName, targetBody, (float)IdentifyRate * TimeWarp.fixedDeltaTime);
-        }
-
-        ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_Scanning");
-        //ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_Progress",
-        //  SpaceDustScenario.Instance.GetSurveyProgressAtBody(ResourceName, targetBody).ToString("F1"));
-      }
-    }
-
-  }
 }

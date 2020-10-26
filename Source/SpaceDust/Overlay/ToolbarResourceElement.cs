@@ -37,7 +37,7 @@ namespace SpaceDust
       visibleToggle.onValueChanged.AddListener(delegate { ToggleResource(); });
 
       bandWidgets = new List<BandResourceElement>();
-      Utils.Log($"Finding {resourceColor} {resourceName} {visibleToggle}");
+     // Utils.Log($"Finding {resourceColor} {resourceName} {visibleToggle}");
     }
 
     public void Start()

@@ -102,8 +102,8 @@ namespace SpaceDust
       {
         foreach (SpaceDustDiscoveryData data in distributionData)
         {
-          //node.AddNode(data.Save());
-          //Utils.Log(data.ToString());
+          node.AddNode(data.Save());
+          Utils.Log(data.ToString());
         }
       }
       Utils.Log(node.ToString());
@@ -252,36 +252,35 @@ namespace SpaceDust
     {
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
-        AddDiscoveryAtBand(resourceName, band.name, b.bodyName, amount);
+        AddDiscoveryAtBand(resourceName, band, b.bodyName, amount);
       }
     }
-    public void AddDiscoveryAtBand(string resourceName, string bandName, CelestialBody b, float amount)
+    public void AddDiscoveryAtBand(string resourceName, ResourceBand band, CelestialBody b, float amount)
     {
-      AddDiscoveryAtBand(resourceName, bandName, b.bodyName, amount);
+      AddDiscoveryAtBand(resourceName, band, b.bodyName, amount);
     }
-    public void AddDiscoveryAtBand(string resourceName, string bandName, string bodyName, float amount)
+    public void AddDiscoveryAtBand(string resourceName, ResourceBand band, string bodyName, float amount)
     {
-      if (!IsDiscovered(resourceName, bandName, bodyName))
+      if (!IsDiscovered(resourceName, band.name, bodyName))
       {
         List<SpaceDustDiscoveryData> toDiscover = distributionData.FindAll(x =>
-        (x.ResourceName == resourceName) &&
-        (x.BandName == bandName) &&
-        (x.BodyName == bodyName));
+          (x.ResourceName == resourceName) &&
+          (x.BandName == band.name) &&
+          (x.BodyName == bodyName));
 
         if (toDiscover == null || toDiscover.Count == 0)
         {
-          distributionData.Add(new SpaceDustDiscoveryData(resourceName, bandName, bodyName, false, false));
+          distributionData.Add(new SpaceDustDiscoveryData(resourceName, band.name, bodyName, false, false));
 
         }
         else
         {
           foreach (SpaceDustDiscoveryData data in toDiscover)
           {
-            data.discoveryPercent += amount;
-            Utils.Log($"{data.discoveryPercent}");
+            data.discoveryPercent += amount * band.RemoteDiscoveryScale;
             if (data.discoveryPercent >= 100f)
             {
-              DiscoverResourceBand(resourceName, bandName, bodyName);
+              DiscoverResourceBand(resourceName, band.name, bodyName);
             }
           }
         }
@@ -292,25 +291,25 @@ namespace SpaceDust
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
 
-        AddIdentifyAtBand(resourceName, band.name, b.bodyName, amount);
+        AddIdentifyAtBand(resourceName, band, b.bodyName, amount);
       }
     }
-    public void AddIdentifyAtBand(string resourceName, string bandName, CelestialBody b, float amount)
+    public void AddIdentifyAtBand(string resourceName, ResourceBand band, CelestialBody b, float amount)
     {
-      AddIdentifyAtBand(resourceName, bandName, b.bodyName, amount);
+      AddIdentifyAtBand(resourceName, band, b.bodyName, amount);
     }
-    public void AddIdentifyAtBand(string resourceName, string bandName, string bodyName, float amount)
+    public void AddIdentifyAtBand(string resourceName, ResourceBand band, string bodyName, float amount)
     {
-      if (!IsIdentified(resourceName, bandName, bodyName))
+      if (!IsIdentified(resourceName, band.name, bodyName))
       {
         List<SpaceDustDiscoveryData> toIdentify = distributionData.FindAll(x =>
         (x.ResourceName == resourceName) &&
-        (x.BandName == bandName) &&
+        (x.BandName == band.name) &&
         (x.BodyName == bodyName));
 
         if (toIdentify == null || toIdentify.Count == 0)
         {
-          distributionData.Add(new SpaceDustDiscoveryData(resourceName, bandName, bodyName, true, true));
+          distributionData.Add(new SpaceDustDiscoveryData(resourceName, band.name, bodyName, true, true));
         }
         else
         {
@@ -318,12 +317,11 @@ namespace SpaceDust
           {
             if (data.Discovered)
             {
-              data.identifyPercent += amount;
-              Utils.Log($"{data.identifyPercent}");
+              data.identifyPercent += amount * band.RemoteDiscoveryScale;
             }
             if (data.identifyPercent >= 100f)
             {
-              IdentifyResourceBand(resourceName, bandName, bodyName);
+              IdentifyResourceBand(resourceName, band.name, bodyName);
             }
           }
         }
@@ -342,7 +340,7 @@ namespace SpaceDust
       }
       if (maxProgress > 0)
         return 100f;
-      return progress/maxProgress * 100f;
+      return progress / maxProgress * 100f;
     }
 
     public float GetBandSurveyProgress(string resourceName, string bandName, string bodyName)
@@ -361,7 +359,7 @@ namespace SpaceDust
       {
         foreach (SpaceDustDiscoveryData data in toEval)
         {
-          return data.identifyPercent+ data.discoveryPercent;
+          return data.identifyPercent + data.discoveryPercent;
         }
       }
       if (HighLogic.LoadedSceneIsFlight)

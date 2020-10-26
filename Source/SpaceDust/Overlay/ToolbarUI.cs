@@ -46,7 +46,8 @@ namespace SpaceDust
 
     public void OnMapEntered()
     {
-      Utils.Log($"[ToolbarUI] Entering map view, focus on {PlanetariumCamera.fetch.target.DisplayName}");
+      if (Settings.DebugUI)
+        Utils.Log($"[ToolbarUI] Entering map view, focus on {PlanetariumCamera.fetch.target.DisplayName}");
       CelestialBody body = PlanetariumCamera.fetch.target.celestialBody;
       if (body == null)
       {
@@ -56,7 +57,8 @@ namespace SpaceDust
     }
     public void OnMapFocusChange(MapObject mapObject)
     {
-      Utils.Log($"[ToolbarUI] Changed focus to {mapObject.GetName()}");
+      if (Settings.DebugUI)
+        Utils.Log($"[ToolbarUI] Changed focus to {mapObject.GetName()}");
       if (mapObject != null)
 
       {

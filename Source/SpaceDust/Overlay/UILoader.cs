@@ -16,6 +16,7 @@ namespace SpaceDust
 
     private void Awake()
     {
+
       Utils.Log("[UILoader]: Loading UI Prefabs");
       AssetBundle prefabs = AssetBundle.LoadFromFile(Path.Combine(KSPUtil.ApplicationRootPath, "GameData/SpaceDust/UI/spacedustui.dat"));
       ToolbarWidgetPrefab = prefabs.LoadAsset("SpaceDustEnhancedResourceElement") as GameObject;
