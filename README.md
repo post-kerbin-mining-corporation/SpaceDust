@@ -1,6 +1,7 @@
 # Space Dust
 
-A mod pack for Kerbal Space Program, focused on providing resource collection frameworks for space and atmosphere
+
+This is a KSP mod designed to overhaul the atmospheric and exospheric mining experience in KSP. It functions both as a framework, providing part modules and distributions to others, and an actual gameplay mod designed to provide a set of parts focused around atmospheric ISRU in the stock system.
 
 * [Features](#features)
 * [Dependencies](#dependencies)
@@ -11,7 +12,25 @@ A mod pack for Kerbal Space Program, focused on providing resource collection fr
 
 ## Features
 
-ATBW
+### Atmospheric and Exospheric Resources
+
+Resources can be distributed in atmospheres or in free space
+
+### Prospecting
+
+There are three types of scanning 
+
+### Harvesting
+
+Harvest using processors
+
+### Distributions
+
+Distributions for the following:
+
+### Framework
+
+This mod is for others too!
 
 ## Dependencies
 

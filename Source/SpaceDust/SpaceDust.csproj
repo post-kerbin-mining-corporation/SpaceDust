@@ -78,6 +78,10 @@
     <Compile Include="Modules\ModuleSpaceDustHarvester.cs" />
     <Compile Include="Modules\ModuleSpaceDustScanner.cs" />
     <Compile Include="Modules\ModuleSpaceDustTelescope.cs" />
+    <Compile Include="SpaceDustInstruments.cs" />
+    <Compile Include="Vessel\SpaceDustHarvesterBackground.cs" />
+    <Compile Include="Vessel\SpaceDustTelescopeBackground.cs" />
+    <Compile Include="Vessel\SpaceDustVessel.cs" />
     <Compile Include="Overlay\BandResourceElement.cs" />
     <Compile Include="Overlay\MapOverlay.cs" />
     <Compile Include="Overlay\ParticleField.cs" />

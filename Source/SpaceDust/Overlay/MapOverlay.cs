@@ -29,13 +29,14 @@ namespace SpaceDust
     }
     public void onGameSceneLoadRequested(GameScenes scenes)
     {
-
-      Utils.Log($"[MapOverlay] Load Requested");
+      if (Settings.DebugOverlay)
+        Utils.Log($"[MapOverlay] Load Requested");
       RemoveBodyFields();
     }
     public void OnMapEntered()
     {
-      Utils.Log($"[MapOverlay] Entering map view, focus on {PlanetariumCamera.fetch.target.name}");
+      if (Settings.DebugOverlay)
+        Utils.Log($"[MapOverlay] Entering map view, focus on {PlanetariumCamera.fetch.target.name}");
       CelestialBody body = PlanetariumCamera.fetch.target.celestialBody;
       if (body == null)
       {
@@ -46,7 +47,8 @@ namespace SpaceDust
 
     public void OnMapFocusChange(MapObject mapObject)
     {
-      Utils.Log($"[MapOverlay] Changed focus to {mapObject.name}");
+      if (Settings.DebugOverlay)
+        Utils.Log($"[MapOverlay] Changed focus to {mapObject.name}");
       if (mapObject != null)
 
       {
@@ -92,7 +94,8 @@ namespace SpaceDust
 
     void RemoveBodyFields()
     {
-      Utils.Log($"[MapOverlay]: Removing body fields");
+      if (Settings.DebugOverlay)
+        Utils.Log($"[MapOverlay]: Removing body fields");
       for (int i = drawnFields.Count - 1; i >= 0; i--)
       {
         Destroy(drawnFields[i].gameObject);

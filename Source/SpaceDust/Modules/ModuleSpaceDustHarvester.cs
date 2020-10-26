@@ -102,7 +102,7 @@ namespace SpaceDust
       Enabled = false;
     }
 
-    protected List<HarvestedResource> resources;
+    public List<HarvestedResource> resources;
     protected Transform HarvestIntakeTransform;
     private AnimationState[] harvestState;
     private AnimationState[] loopState;
@@ -268,7 +268,7 @@ namespace SpaceDust
     }
     void DoFocusedHarvesting()
     {
-      double efficiencyMultiplier = 1d;
+      
       if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0.0001d)
       {
         if (part.vessel.atmDensity < 0.0001d)
@@ -294,13 +294,15 @@ namespace SpaceDust
         {
           double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
             part.vessel.mainBody,
-            vessel.altitude,
+            vessel.altitude + part.vessel.mainBody.Radius,
             vessel.latitude,
             vessel.longitude);
 
           if (resourceSample > resources[i].MinHarvestValue)
           {
             double resAmt = resourceSample * intakeVolume * resources[i].BaseEfficiency;
+            if (ScoopUI != "")
+              ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
@@ -340,7 +342,7 @@ namespace SpaceDust
         {
           double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
             part.vessel.mainBody,
-            vessel.altitude,
+            vessel.altitude + part.vessel.mainBody.Radius,
             vessel.latitude,
             vessel.longitude);
 

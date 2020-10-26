@@ -20,6 +20,8 @@ namespace SpaceDust
 
     public bool AlwaysDiscovered = false;
     public bool AlwaysIdentified = false;
+    public float RemoteDiscoveryScale = 1f;
+
 
     float countScale = 1f;
     float rotateRate = 1f;
@@ -29,7 +31,7 @@ namespace SpaceDust
 
     FloatCurve densityCurve;
     CelestialBody associatedBody;
-    
+
     public DistributionModel Distribution { get; private set; }
 
     public ResourceBand(string resourceName, ConfigNode node)
@@ -37,7 +39,7 @@ namespace SpaceDust
       ResourceName = resourceName;
       string distName = "Uniform";
       densityCurve = new FloatCurve();
-      
+
       node.TryGetValue("name", ref name);
       node.TryGetValue("title", ref title);
       node.TryGetValue("countScale", ref countScale);
@@ -49,8 +51,11 @@ namespace SpaceDust
 
       node.TryGetValue("alwaysDiscovered", ref AlwaysDiscovered);
       node.TryGetValue("alwaysIdentified", ref AlwaysIdentified);
+      node.TryGetValue("alwaysIdentified", ref AlwaysIdentified);
 
       node.TryGetValue("distributionType", ref distName);
+
+      node.TryGetValue("remoteDiscoveryScale", ref RemoteDiscoveryScale);
 
       title = Localizer.Format(title);
 
@@ -64,7 +69,7 @@ namespace SpaceDust
 
       if (distName == "Spherical")
         Distribution = new SphericalDistributionModel(node) as DistributionModel;
-      
+
     }
 
     public void Initialize(string bodyName)
@@ -74,7 +79,7 @@ namespace SpaceDust
       /// Does game-time initializations
       Distribution.Initialize();
 
-      
+
       UnityEngine.Random.InitState(HighLogic.fetch.currentGame.Seed);
       Abundance = UnityEngine.Random.Range((float)minAbundance, (float)maxAbundance);
       foreach (CelestialBody b in FlightGlobals.Bodies)
@@ -87,9 +92,9 @@ namespace SpaceDust
       }
 
       if (AlwaysDiscovered || Settings.SetAllDiscovered)
-        SpaceDustScenario.Instance.DiscoverResourceBand( ResourceName, name, associatedBody);
+        SpaceDustScenario.Instance.DiscoverResourceBand(ResourceName, name, associatedBody);
       if (AlwaysIdentified || Settings.SetAllIdentified)
-        SpaceDustScenario.Instance.IdentifyResourceBand( ResourceName, name, associatedBody);
+        SpaceDustScenario.Instance.IdentifyResourceBand(ResourceName, name, associatedBody);
     }
 
     public bool CheckDistanceToCenter(double testAltitude, double proximityThreshold)
@@ -105,14 +110,12 @@ namespace SpaceDust
     {
       double sampleResult = Abundance * Distribution.Sample(altitude, latitude, longitude);
 
-      //Utils.Log($"Looking at abundance {Abundance}, sampled {sampleResult}");
-
       if (useAirDensity)
         sampleResult *= densityCurve.Evaluate((float)associatedBody.GetPressureAtm(altitude - associatedBody.Radius));
 
       return sampleResult;
     }
-    
+
     /// TODO: Make me better
     public string ToString()
     {

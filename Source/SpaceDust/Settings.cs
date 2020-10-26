@@ -19,9 +19,13 @@ namespace SpaceDust
     public static bool DebugOverlay = true;
     // Emit module  debug messages
     public static bool DebugModules = true;
+    // Emit module  debug messages
+    public static bool DebugBackground = true;
 
     public static bool SetAllDiscovered = false;
     public static bool SetAllIdentified = false;
+    public static float BaseTelescopeDiscoverRate = .0001f;
+
     public static int particleFieldBaseCount = 2000;
     public static float particleFieldBaseSize = 2f;
     public static float particleFieldMaxViewportParticleScale = 0.01f;
@@ -71,6 +75,8 @@ namespace SpaceDust
 
         settingsNode.TryGetValue("SetAllDiscovered", ref SetAllDiscovered);
         settingsNode.TryGetValue("SetAllIdentified", ref SetAllIdentified);
+        settingsNode.TryGetValue("BaseTelescopeDiscoverRate", ref BaseTelescopeDiscoverRate);
+
         settingsNode.TryGetValue("particleFieldBaseCount", ref particleFieldBaseCount);
         settingsNode.TryGetValue("particleFieldBaseSize", ref particleFieldBaseSize);
         settingsNode.TryGetValue("particleFieldShaderName", ref particleFieldShaderName);

@@ -37,7 +37,7 @@ namespace SpaceDust
       visibleToggle.onValueChanged.AddListener(delegate { ToggleResource(); });
 
       bandWidgets = new List<BandResourceElement>();
-      Utils.Log($"Finding {resourceColor} {resourceName} {visibleToggle}");
+     // Utils.Log($"Finding {resourceColor} {resourceName} {visibleToggle}");
     }
 
     public void Start()
@@ -72,16 +72,19 @@ namespace SpaceDust
       {
         resourceName.text = ResourceName;
         resourceColor.color = Settings.GetResourceColor(ResourceName);
+        SetVisible(true);
       }
       else if (anyDiscover)
       {
         resourceColor.color = Settings.resourceDiscoveredColor;
         resourceName.text = Localizer.Format("#LOC_SpaceDust_UI_UnknownResource");
+        SetVisible(true);
       }
       else
       {
         SetVisible(false);
       }
+
       foreach( ResourceBand b in bands)
       {
         GameObject newElement = (GameObject)Instantiate(UILoader.BandResourceWidgetPrefab, Vector3.zero, Quaternion.identity);

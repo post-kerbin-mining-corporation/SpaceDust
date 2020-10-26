@@ -51,17 +51,20 @@ namespace SpaceDust
       {
         for (int i = resourceEntries.Count - 1; i >= 0; i--)
         {
+          
           if (resourceEntries[i].active)
           {
             hasVisibleResources = true;
           }
         }
       }
+      
       noneText.gameObject.SetActive(!hasVisibleResources);
     }
     public void RemoveResourceEntries()
     {
-      Utils.Log($"[ToolbarPanel] Clearing all entries");
+      if (Settings.DebugUI)
+        Utils.Log($"[ToolbarPanel] Clearing all entries");
       if (resourceEntries != null && resourceEntries.Count > 0)
       {
         for (int i= resourceEntries.Count-1; i >= 0;i--)
@@ -75,7 +78,8 @@ namespace SpaceDust
 
     public void AddResourceEntry(CelestialBody body, string resourceName, List<ResourceBand> bands, bool shown)
     {
-      Utils.Log($"[ToolbarPanel]: Adding a new resource element for {resourceName}");
+      if (Settings.DebugUI)
+        Utils.Log($"[ToolbarPanel]: Adding a new resource element for {resourceName}");
       noneText.gameObject.SetActive(false);
       GameObject newElement = (GameObject)Instantiate(UILoader.ToolbarWidgetPrefab, Vector3.zero, Quaternion.identity);
       
@@ -86,6 +90,7 @@ namespace SpaceDust
       res.SetResource(body, resourceName, bands, shown);
 
       resourceEntries.Add(res);
+      if (Settings.DebugUI)
       Utils.Log($"[ToolbarPanel] Added a new resource entry for {resourceName}");
     }
   }
