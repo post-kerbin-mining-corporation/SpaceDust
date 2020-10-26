@@ -53,6 +53,8 @@ namespace SpaceDust
       node.TryGetValue("alwaysIdentified", ref AlwaysIdentified);
       node.TryGetValue("alwaysIdentified", ref AlwaysIdentified);
 
+      node.TryGetValue("distributionType", ref distName);
+
       node.TryGetValue("remoteDiscoveryScale", ref RemoteDiscoveryScale);
 
       title = Localizer.Format(title);
@@ -107,8 +109,6 @@ namespace SpaceDust
     public double Sample(double altitude, double latitude, double longitude)
     {
       double sampleResult = Abundance * Distribution.Sample(altitude, latitude, longitude);
-
-      //Utils.Log($"Looking at abundance {Abundance}, sampled {sampleResult}");
 
       if (useAirDensity)
         sampleResult *= densityCurve.Evaluate((float)associatedBody.GetPressureAtm(altitude - associatedBody.Radius));

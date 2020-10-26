@@ -51,12 +51,14 @@ namespace SpaceDust
       {
         for (int i = resourceEntries.Count - 1; i >= 0; i--)
         {
+          
           if (resourceEntries[i].active)
           {
             hasVisibleResources = true;
           }
         }
       }
+      
       noneText.gameObject.SetActive(!hasVisibleResources);
     }
     public void RemoveResourceEntries()

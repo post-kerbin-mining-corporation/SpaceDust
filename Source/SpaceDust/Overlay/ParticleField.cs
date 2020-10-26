@@ -122,12 +122,16 @@ namespace SpaceDust
       List<ParticleSystem.Particle> particles = new List<ParticleSystem.Particle>();
       int i = 0;
       int iterations = 0;
-      
+
+      Utils.Log($"maxSize {resBand.Distribution.MaxSize()}");
+      Utils.Log($"dist {resBand.Distribution.ToString()}");
+
       while (i < count && iterations < count * 10)
       {
-
-        Vector3 pos = UnityEngine.Random.insideUnitSphere * (float)resBand.Distribution.MaxSize() / ScaledSpace.ScaleFactor;
+        
+        Vector3 pos = UnityEngine.Random.insideUnitSphere * ((float)resBand.Distribution.MaxSize() / ScaledSpace.ScaleFactor);
         Vector3 sphericalPos = Cart2Sphere(new Vector3(pos.z, pos.x, pos.y));
+
         float sampled = (float)resBand.Distribution.Sample(sphericalPos.x* ScaledSpace.ScaleFactor, 90d - sphericalPos.z * Mathf.Rad2Deg, sphericalPos.y * Mathf.Rad2Deg);
         
         if (sampled >= 0.0001f)

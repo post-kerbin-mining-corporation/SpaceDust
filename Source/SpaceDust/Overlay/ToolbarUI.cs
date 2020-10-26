@@ -157,7 +157,7 @@ namespace SpaceDust
         if (HighLogic.LoadedSceneIsFlight)
         {
 
-          toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width, toolbarPanel.rect.rect.height, 0f);
+          toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width + 50f, toolbarPanel.rect.rect.height, 0f);
         }
       }
     }
