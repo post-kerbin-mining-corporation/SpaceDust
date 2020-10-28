@@ -1,3 +1,11 @@
+v0.1.1
+------
+- Added missing B9PartSwitch to distribution
+- Added Science integration: in Science or Career mode, identifying or discovering a resource band will add science to your space program
+  - This is configured by a base value in SpaceDustSettings.cfg, which is scaled by the Hight Orbit scale of the body in question
+  - Configurable per-band by specifying discoveryScienceReward or identifyScienceReward in the band's configuration
+- Fixed an issue where a part with ModuleSpaceDustTelescope would brick the game in a new and fun way
+
 v0.1.0
 ------
 - The beginning

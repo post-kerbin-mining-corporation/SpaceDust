@@ -25,6 +25,8 @@ namespace SpaceDust
     public static bool SetAllDiscovered = false;
     public static bool SetAllIdentified = false;
     public static float BaseTelescopeDiscoverRate = .0001f;
+    public static float BaseDiscoverScienceReward = 5f;
+    public static float BaseIdentifyScienceReward = 5f;
 
     public static int particleFieldBaseCount = 2000;
     public static float particleFieldBaseSize = 2f;
@@ -76,6 +78,8 @@ namespace SpaceDust
         settingsNode.TryGetValue("SetAllDiscovered", ref SetAllDiscovered);
         settingsNode.TryGetValue("SetAllIdentified", ref SetAllIdentified);
         settingsNode.TryGetValue("BaseTelescopeDiscoverRate", ref BaseTelescopeDiscoverRate);
+        settingsNode.TryGetValue("BaseDiscoverScienceReward", ref BaseDiscoverScienceReward);
+        settingsNode.TryGetValue("BaseIdentifyScienceReward", ref BaseIdentifyScienceReward);
 
         settingsNode.TryGetValue("particleFieldBaseCount", ref particleFieldBaseCount);
         settingsNode.TryGetValue("particleFieldBaseSize", ref particleFieldBaseSize);

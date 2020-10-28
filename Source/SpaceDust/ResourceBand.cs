@@ -22,6 +22,8 @@ namespace SpaceDust
     public bool AlwaysIdentified = false;
     public float RemoteDiscoveryScale = 1f;
 
+    public float discoveryScienceReward = 1f;
+    public float identifyScienceReward = 1f;
 
     float countScale = 1f;
     float rotateRate = 1f;
@@ -56,6 +58,11 @@ namespace SpaceDust
       node.TryGetValue("distributionType", ref distName);
 
       node.TryGetValue("remoteDiscoveryScale", ref RemoteDiscoveryScale);
+
+      discoveryScienceReward = Settings.BaseDiscoverScienceReward;
+      identifyScienceReward = Settings.BaseIdentifyScienceReward;
+      node.TryGetValue("discoveryScienceReward", ref discoveryScienceReward);
+      node.TryGetValue("identifyScienceReward", ref identifyScienceReward);
 
       title = Localizer.Format(title);
 
@@ -92,9 +99,9 @@ namespace SpaceDust
       }
 
       if (AlwaysDiscovered || Settings.SetAllDiscovered)
-        SpaceDustScenario.Instance.DiscoverResourceBand(ResourceName, name, associatedBody);
+        SpaceDustScenario.Instance.DiscoverResourceBand(ResourceName, this, associatedBody);
       if (AlwaysIdentified || Settings.SetAllIdentified)
-        SpaceDustScenario.Instance.IdentifyResourceBand(ResourceName, name, associatedBody);
+        SpaceDustScenario.Instance.IdentifyResourceBand(ResourceName, this, associatedBody);
     }
 
     public bool CheckDistanceToCenter(double testAltitude, double proximityThreshold)

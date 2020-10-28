@@ -12,31 +12,17 @@ This is a KSP mod designed to overhaul the atmospheric and exospheric mining exp
 
 ## Features
 
-### Atmospheric and Exospheric Resources
-
-Resources can be distributed in atmospheres or in free space
-
-### Prospecting
-
-There are three types of scanning 
-
-### Harvesting
-
-Harvest using processors
-
-### Distributions
-
-Distributions for the following:
 
 ### Framework
 
-This mod is for others too!
+This mod is for others too! See the [wiki](https://github.com/ChrisAdderley/SpaceDust/wiki) for how to configure distributions and modules. 
 
 ## Dependencies
 
 ### Required
 These components are required for the mod to function and are bundled as part of any download:
 * [ModuleManager (4.1.4)](https://github.com/sarbian/ModuleManager)
+* [B9PartSwitch (2.17.0)](https://github.com/blowfishpro/B9PartSwitch)
 
 ## Installation
 
