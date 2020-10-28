@@ -254,7 +254,7 @@ namespace SpaceDust
                     {
                       if (band.CheckDistanceToCenter(vessel.altitude, resources[i].DiscoverRange))
                       {
-                        SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                        SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band, vessel.mainBody);
                       }
                     }
                   }
@@ -268,7 +268,7 @@ namespace SpaceDust
                     {
                       if (band.Sample(vessel.altitude, vessel.latitude, vessel.longitude) > resources[i].LocalThreshold)
                       {
-                        SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                        SpaceDustScenario.Instance.DiscoverResourceBand(resources[i].Name, band, vessel.mainBody);
                       }
                     }
                   }
@@ -289,7 +289,7 @@ namespace SpaceDust
                     {
                       if (band.CheckDistanceToCenter(vessel.altitude+ vessel.mainBody.Radius, resources[i].IdentifyRange))
                       {
-                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band, vessel.mainBody);
                       }
                     }
                   }
@@ -303,7 +303,7 @@ namespace SpaceDust
                     {
                       if (band.Sample(vessel.altitude, vessel.latitude, vessel.longitude) > resources[i].LocalThreshold)
                       {
-                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band.name, vessel.mainBody);
+                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band, vessel.mainBody);
                       }
                     }
                   }

@@ -168,25 +168,25 @@ namespace SpaceDust
     {
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
-        DiscoverResourceBand(resourceName, band.name, b.bodyName);
+        DiscoverResourceBand(resourceName, band, b.bodyName);
       }
     }
-    public void DiscoverResourceBand(string resourceName, string bandName, CelestialBody b)
+    public void DiscoverResourceBand(string resourceName, ResourceBand band, CelestialBody b)
     {
-      DiscoverResourceBand(resourceName, bandName, b.bodyName);
+      DiscoverResourceBand(resourceName, band, b.bodyName);
     }
-    public void DiscoverResourceBand(string resourceName, string bandName, string bodyName)
+    public void DiscoverResourceBand(string resourceName, ResourceBand band, string bodyName)
     {
-      if (!IsDiscovered(resourceName, bandName, bodyName))
+      if (!IsDiscovered(resourceName, band.name, bodyName))
       {
         List<SpaceDustDiscoveryData> toDiscover = distributionData.FindAll(x =>
         (x.ResourceName == resourceName) &&
-        (x.BandName == bandName) &&
+        (x.BandName == band.name) &&
         (x.BodyName == bodyName));
 
         if (toDiscover == null || toDiscover.Count == 0)
         {
-          distributionData.Add(new SpaceDustDiscoveryData(resourceName, bandName, bodyName, true, false));
+          distributionData.Add(new SpaceDustDiscoveryData(resourceName, band.name, bodyName, true, false));
         }
         else
         {
@@ -201,7 +201,15 @@ namespace SpaceDust
           ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Discovery", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
           ScreenMessages.PostScreenMessage(msg);
         }
-        Utils.Log($"[SpaceDustScenario]: Discovered {resourceName} in {bandName} at {bodyName}");
+        Utils.Log($"[SpaceDustScenario]: Discovered {resourceName} in {band.name} at {bodyName}");
+
+        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX)
+        {
+          float scienceValue = FlightGlobals.GetBodyByName(bodyName).scienceValues.InSpaceHighDataValue * band.identifyScienceReward;
+          Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was discovered");
+
+          ResearchAndDevelopment.Instance.AddScience(scienceValue, TransactionReasons.ScienceTransmission);
+        }
       }
     }
     public void IdentifyResourceBandsAtBody(string resourceName, CelestialBody b)
@@ -209,25 +217,25 @@ namespace SpaceDust
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
 
-        IdentifyResourceBand(resourceName, band.name, b.bodyName);
+        IdentifyResourceBand(resourceName, band, b.bodyName);
       }
     }
-    public void IdentifyResourceBand(string resourceName, string bandName, CelestialBody b)
+    public void IdentifyResourceBand(string resourceName, ResourceBand band, CelestialBody b)
     {
-      IdentifyResourceBand(resourceName, bandName, b.bodyName);
+      IdentifyResourceBand(resourceName, band, b.bodyName);
     }
-    public void IdentifyResourceBand(string resourceName, string bandName, string bodyName)
+    public void IdentifyResourceBand(string resourceName, ResourceBand band, string bodyName)
     {
-      if (!IsIdentified(resourceName, bandName, bodyName))
+      if (!IsIdentified(resourceName, band.name, bodyName))
       {
         List<SpaceDustDiscoveryData> toIdentify = distributionData.FindAll(x =>
         (x.ResourceName == resourceName) &&
-        (x.BandName == bandName) &&
+        (x.BandName == band.name) &&
         (x.BodyName == bodyName));
 
         if (toIdentify == null || toIdentify.Count == 0)
         {
-          distributionData.Add(new SpaceDustDiscoveryData(resourceName, bandName, bodyName, true, true));
+          distributionData.Add(new SpaceDustDiscoveryData(resourceName, band.name, bodyName, true, true));
         }
         else
         {
@@ -244,7 +252,15 @@ namespace SpaceDust
           ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Identified", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
           ScreenMessages.PostScreenMessage(msg);
         }
-        Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {bandName} at {bodyName}");
+        Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {band.name} at {bodyName}");
+        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX)
+        {
+          float scienceValue = FlightGlobals.GetBodyByName(bodyName).scienceValues.InSpaceHighDataValue * band.identifyScienceReward;
+          Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was identified");
+
+          ResearchAndDevelopment.Instance.AddScience(scienceValue, TransactionReasons.ScienceTransmission);
+        }
+       
       }
     }
 
@@ -280,7 +296,7 @@ namespace SpaceDust
             data.discoveryPercent += amount * band.RemoteDiscoveryScale;
             if (data.discoveryPercent >= 100f)
             {
-              DiscoverResourceBand(resourceName, band.name, bodyName);
+              DiscoverResourceBand(resourceName, band, bodyName);
             }
           }
         }
@@ -321,7 +337,7 @@ namespace SpaceDust
             }
             if (data.identifyPercent >= 100f)
             {
-              IdentifyResourceBand(resourceName, band.name, bodyName);
+              IdentifyResourceBand(resourceName, band, bodyName);
             }
           }
         }

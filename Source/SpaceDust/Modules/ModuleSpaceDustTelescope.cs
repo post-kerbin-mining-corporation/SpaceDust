@@ -148,10 +148,12 @@ namespace SpaceDust
     public override void OnSave(ConfigNode node)
     {
       base.OnSave(node);
-      for (int i = 0; i < instrumentSlots.Count; i++)
-      {
-        node.AddNode(instrumentSlots[i].Save());
-      }
+      if (instrumentSlots != null)
+        for (int i = 0; i < instrumentSlots.Count; i++)
+        {
+          if (instrumentSlots[i] != null)
+            node.AddNode(instrumentSlots[i].Save());
+        }
 
     }
     public override void OnAwake()
