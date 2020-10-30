@@ -123,8 +123,6 @@ namespace SpaceDust
       int i = 0;
       int iterations = 0;
 
-      Utils.Log($"maxSize {resBand.Distribution.MaxSize()}");
-      Utils.Log($"dist {resBand.Distribution.ToString()}");
 
       while (i < count && iterations < count * 10)
       {
