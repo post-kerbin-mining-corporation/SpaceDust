@@ -103,10 +103,8 @@ namespace SpaceDust
         foreach (SpaceDustDiscoveryData data in distributionData)
         {
           node.AddNode(data.Save());
-          Utils.Log(data.ToString());
         }
       }
-      Utils.Log(node.ToString());
       Utils.Log("[SpaceDustScenario]: Done Saving");
     }
     public bool IsAnyDiscovered(string resourceName, CelestialBody b)

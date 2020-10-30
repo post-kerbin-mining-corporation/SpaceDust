@@ -37,12 +37,12 @@ namespace SpaceDust
         TargetBody = FlightGlobals.GetBodyByName(tgtString);
       }
 
-      Utils.Log($"[SDBGT]: {ves.name}: {tgtString}, {TargetBody}, {Enabled}");
+      //Utils.Log($"[SDBGT]: {ves.name}: {tgtString}, {TargetBody}, {Enabled}");
       selectedInstruments = new List<SpaceDustInstrument>();
       foreach (ConfigNode c in protoTelescopeModule.moduleValues.GetNodes("SLOT"))
       {
         string instName = c.GetValue("Instrument");
-        Utils.Log($"[SDBGT]: {instName}");
+        //Utils.Log($"[SDBGT]: {instName}");
         if (instName != "None")
           selectedInstruments.Add(SpaceDustInstruments.Instance.GetInstrument(instName));
       }
