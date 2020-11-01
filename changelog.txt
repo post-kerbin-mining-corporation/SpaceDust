@@ -1,3 +1,7 @@
+v0.1.3
+------
+- Fixed incorrect rotation of Sift-O-Tron 250
+
 v0.1.2
 ------
 - Fixed some major log spam
