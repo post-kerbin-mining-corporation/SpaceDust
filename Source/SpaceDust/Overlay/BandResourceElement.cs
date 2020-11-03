@@ -54,7 +54,8 @@ namespace SpaceDust.Overlay
         bandName.enabled = true;
         concentration.enabled = true;
         bandName.text = bnd.title;
-        concentration.text = Localizer.Format("#LOC_SpaceDust_UI_BandData", bnd.Abundance.ToString("G3"));
+        double smple = bnd.Abundance / PartResourceLibrary.Instance.GetDefinition(bnd.ResourceName).density;
+        concentration.text = Localizer.Format("#LOC_SpaceDust_UI_BandData", smple.ToString("G3"));
       }
       else if (SpaceDustScenario.Instance.IsDiscovered(bnd.ResourceName, bnd.name, body))
       {

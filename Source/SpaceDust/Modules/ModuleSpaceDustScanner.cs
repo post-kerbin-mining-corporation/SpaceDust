@@ -22,6 +22,7 @@ namespace SpaceDust
     public double LocalThreshold = 0.01;
     public double DiscoverRange = 70000;
     public double IdentifyRange = 30000;
+    public double density = 0.05;
 
     public ScannedResource(ConfigNode c)
     {
@@ -35,6 +36,7 @@ namespace SpaceDust
       c.TryGetValue("LocalThreshold", ref LocalThreshold);
       c.TryGetValue("DiscoverRange", ref DiscoverRange);
       c.TryGetValue("IdentifyRange", ref IdentifyRange);
+      density = PartResourceLibrary.Instance.GetDefinition(Name).density;
 
 
     }
@@ -238,7 +240,7 @@ namespace SpaceDust
                   part.vessel.mainBody,
                   vessel.altitude+ part.vessel.mainBody.Radius,
                   vessel.latitude,
-                  vessel.longitude);
+                  vessel.longitude) * 1d/resources[i].density;
                 //Utils.Log($"{resources[i].Name} at {part.vessel.mainBody}, alt: {vessel.altitude} lat: {vessel.latitude}, lon: {vessel.longitude}, sample: {resourceSample}");
                 // This mod discovers all bands at the body
                 if (resources[i].DiscoverMode == DiscoverMode.SOI)
