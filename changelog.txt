@@ -1,3 +1,13 @@
+v0.1.4
+------
+- Fixed harvesters harvesting in t/m3, when they should have been using u/m3
+- Fixed the UI showing t/m3 sometimes, should always be u/m3
+- Distributions
+ - Adjusted all exospheric resource distributions, were far too high
+- Fixed large atmosphere processor's loop and activate animations
+- Decreased static intake speed for processors to more realistic values
+- Tuned efficiencies for processors
+
 v0.1.3
 ------
 - Fixed incorrect rotation of Sift-O-Tron 250

@@ -18,6 +18,7 @@ namespace SpaceDust
     // The basic efficiency, applied at local V = 0
     public float BaseEfficiency;
     public double MinHarvestValue = 0.0001d;
+    public double density = 0.05;
 
 
     public HarvestedResource() { }
@@ -27,6 +28,7 @@ namespace SpaceDust
       node.TryGetValue("Name", ref Name);
       node.TryGetValue("BaseEfficiency", ref BaseEfficiency);
       node.TryGetValue("MinHarvestValue", ref MinHarvestValue);
+      density = PartResourceLibrary.Instance.GetDefinition(Name).density;
     }
 
     public string GenerateInfoString()
@@ -300,7 +302,7 @@ namespace SpaceDust
 
           if (resourceSample > resources[i].MinHarvestValue)
           {
-            double resAmt = resourceSample * intakeVolume * resources[i].BaseEfficiency;
+            double resAmt = resourceSample * intakeVolume *  1d/resources[i].density *resources[i].BaseEfficiency;
             if (ScoopUI != "")
               ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
@@ -348,7 +350,7 @@ namespace SpaceDust
 
           if (resourceSample * intakeVolume * resources[i].BaseEfficiency > resources[i].MinHarvestValue)
           {
-            double resAmt = resourceSample * intakeVolume * resources[i].BaseEfficiency ;
+            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency;
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
