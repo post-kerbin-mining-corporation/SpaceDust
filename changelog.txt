@@ -1,3 +1,8 @@
+v0.1.5
+------
+- Tuned Antimatter distributions slightly
+- Adjusted initialization of instruments
+
 v0.1.4
 ------
 - Fixed harvesters harvesting in t/m3, when they should have been using u/m3
