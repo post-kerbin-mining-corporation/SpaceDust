@@ -22,6 +22,8 @@ namespace SpaceDust
     // Emit module  debug messages
     public static bool DebugBackground = true;
 
+    public static bool SystemHeatActive = false;
+
     public static bool SetAllDiscovered = false;
     public static bool SetAllIdentified = false;
     public static float BaseTelescopeDiscoverRate = .0001f;
@@ -48,6 +50,25 @@ namespace SpaceDust
 
     public static List<string> visibleResources;
 
+    /// <summary>
+    /// Find any conflicting mods, return false if there are any.
+    /// The result of this will be overridden by the Enable setting in the plugin configuration.
+    /// </summary>
+    private static bool CheckSystemHeat()
+    {
+      foreach (var a in AssemblyLoader.loadedAssemblies)
+      {
+        // search for conflicting mods
+        if (a.name.StartsWith("SystemHeat", StringComparison.Ordinal))
+        {
+          Utils.Log("[Settings]: SystemHeat detected. Thermal considerations will be active for harvesters");
+          // THIS IS OFF BY DEFAULT
+          return false;
+        }
+      }
+      return false;
+    }
+
     public static Color GetResourceColor(string resourceName)
     {
       if (Settings.resourceColors.ContainsKey(resourceName))
@@ -63,6 +84,8 @@ namespace SpaceDust
     {
       ConfigNode settingsNode;
 
+
+      SystemHeatActive = CheckSystemHeat();
       Utils.Log("[Settings]: Started loading");
 
       ConfigNode[] settingsNodes = GameDatabase.Instance.GetConfigNodes("SPACEDUSTSETTINGS");

@@ -32,6 +32,7 @@ namespace SpaceDust
 
     public SpaceDustInstrument GetInstrument(string name)
     {
+      if (Instruments == null) Load();
       if (!Instruments.ContainsKey(name))
       {
         Utils.LogError($"[SpaceDustInstruments]: no defined instrument named {name} exists");
