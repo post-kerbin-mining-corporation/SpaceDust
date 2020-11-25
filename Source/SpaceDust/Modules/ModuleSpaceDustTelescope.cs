@@ -68,7 +68,7 @@ namespace SpaceDust
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Title")]
     public string ScannerUI = "";
     // UI field for showing scan modifier
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Modifier_Title")]
+    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Modifier_Title")]
     public string ModifierUI = "";
 
     // UI field for showing scan status
@@ -262,7 +262,7 @@ namespace SpaceDust
                 if (!Utils.CalculateBodyLOS(this.vessel, targetBody, transform, out angle, out obscuringBody))
                 {
                   SetScanUI(false);
-                  Fields["ModifierUI"].guiActive = false;
+                  //Fields["ModifierUI"].guiActive = false;
                   ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Blocked", obscuringBody.GetDisplayName());
                   return;
                 }
@@ -272,11 +272,11 @@ namespace SpaceDust
                   
 
                   //ModifierUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Modifier_InAtmo", atmosphereScale);
-                  Fields["ModifierUI"].guiActive = true;
+                  //Fields["ModifierUI"].guiActive = true;
                 }
                 else
                 {
-                  Fields["ModifierUI"].guiActive = false;
+                 // Fields["ModifierUI"].guiActive = false;
                 }
 
 
@@ -299,7 +299,7 @@ namespace SpaceDust
               {
                 Target = ""; 
                 SetScanUI(false);
-                Fields["ModifierUI"].guiActive = false;
+               // Fields["ModifierUI"].guiActive = false;
                 ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoTarget");
               }
 
@@ -331,7 +331,7 @@ namespace SpaceDust
         }
         else
         {
-          Fields["ModifierUI"].guiActive = false;
+         // Fields["ModifierUI"].guiActive = false;
           CurrentPowerConsumption = 0f;
           ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Disabled");
           SetScanUI(false);

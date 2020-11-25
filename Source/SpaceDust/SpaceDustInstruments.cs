@@ -94,7 +94,6 @@ namespace SpaceDust
         if (ves.atmDensity > 0.00001)
         {
           atmosphereScale = (float)(Utils.CalculateAirMass(ves, targetBody) * ves.mainBody.atmosphereDepth * ves.mainBody.atmDensityASL);
-          Utils.Log($"{atmosphereScale}");
         }
         
         float toDiscover = (float)(pxSize* Settings.BaseTelescopeDiscoverRate*Sensitivity/100f * AtmosphereEffect.Evaluate((float)atmosphereScale));
@@ -110,8 +109,6 @@ namespace SpaceDust
         results = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_Scanning",
           
           (toDiscover).ToString("F3"));
-        //ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_Progress",
-        //  SpaceDustScenario.Instance.GetSurveyProgressAtBody(ResourceName, targetBody).ToString("F1"));
       }
       return results;
     }
