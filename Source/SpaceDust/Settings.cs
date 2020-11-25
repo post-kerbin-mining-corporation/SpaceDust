@@ -63,9 +63,10 @@ namespace SpaceDust
         {
           Utils.Log("[Settings]: SystemHeat detected. Thermal considerations will be active for harvesters");
           // THIS IS OFF BY DEFAULT
-          return false;
+          return true;
         }
       }
+      Utils.Log("[Settings]: SystemHeat not detected. Thermal disabled");
       return false;
     }
 

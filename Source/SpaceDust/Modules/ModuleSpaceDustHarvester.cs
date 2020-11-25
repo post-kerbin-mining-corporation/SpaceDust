@@ -3,6 +3,7 @@ using Smooth.Algebraics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace SpaceDust
@@ -34,7 +35,7 @@ namespace SpaceDust
 
     public string GenerateInfoString()
     {
-      return Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Resource", Name, (BaseEfficiency*100f).ToString("F1"));
+      return Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Resource", Name, (BaseEfficiency * 100f).ToString("F1"));
     }
   }
   public class ModuleSpaceDustHarvester : PartModule
@@ -83,16 +84,19 @@ namespace SpaceDust
     public String HeatModuleID;
 
     [KSPField(isPersistant = false)]
+    public String ModuleID;
+
+    [KSPField(isPersistant = false)]
     public FloatCurve SystemEfficiency = new FloatCurve();
 
     [KSPField(isPersistant = false)]
-    public FloatCurve SystemPower = new FloatCurve();
+    public float SystemPower = 0f;
 
     [KSPField(isPersistant = false)]
     public float SystemOutletTemperature = 300f;
 
     [KSPField(isPersistant = false)]
-    public float ShutdownTemperature= 1000f;
+    public float ShutdownTemperature = 1000f;
 
 
     // UI field for showing scan status
@@ -107,6 +111,9 @@ namespace SpaceDust
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop")]
     public string ScoopUI = "";
 
+    // UI field for showing scan status
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Thermal")]
+    public string ThermalUI = "";
 
     [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Event_EnableScanner", active = true)]
     public void EnableHarvester()
@@ -123,7 +130,6 @@ namespace SpaceDust
     protected Transform HarvestIntakeTransform;
     private AnimationState[] harvestState;
     private AnimationState[] loopState;
-    private IScalarModule scalarHeatModule;
     private PartModule systemHeatModule;
 
     public override string GetModuleDisplayName()
@@ -134,7 +140,16 @@ namespace SpaceDust
     public override string GetInfo()
     {
       string msg = "";
-      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header", HarvestType.ToString(), IntakeSpeedStatic.ToString("F1"), PowerCost.ToString("F1"));
+      if (Settings.SystemHeatActive)
+        msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header_SystemHeat", 
+          HarvestType.ToString(), 
+          IntakeSpeedStatic.ToString("F1"), 
+          PowerCost.ToString("F1"),
+          SystemPower.ToString("F0"),
+          SystemOutletTemperature.ToString("F0"),
+          ShutdownTemperature.ToString("F0"));
+      else
+        msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header", HarvestType.ToString(), IntakeSpeedStatic.ToString("F1"), PowerCost.ToString("F1"));
 
       foreach (HarvestedResource res in resources)
       {
@@ -156,7 +171,7 @@ namespace SpaceDust
       if (HarvestAnimationName != "")
       {
         harvestState = Utils.SetUpAnimation(HarvestAnimationName, part);
-        
+
         if (Enabled)
         {
           foreach (AnimationState anim in harvestState)
@@ -186,8 +201,9 @@ namespace SpaceDust
 
         if (Settings.SystemHeatActive)
         {
-          systemHeatModule = this.GetComponents<PartModule>().ToList().Find(x => x.moduleName == "ModuleSysteamHeat" && x.Fields.GetValue("moduleID").ToString() == HeatModuleID);
+          systemHeatModule = this.GetComponents<PartModule>().ToList().Find(x => x.moduleName == "ModuleSystemHeat" && x.Fields.GetValue("moduleID").ToString() == HeatModuleID);
         }
+        
       }
     }
 
@@ -240,17 +256,22 @@ namespace SpaceDust
         if (Enabled)
         {
           CurrentPowerConsumption = -PowerCost;
-          // check power
           
+          // add heat
+          if (Settings.SystemHeatActive && systemHeatModule != null)
+            AddFlux(SystemOutletTemperature, SystemPower);
+          // check power
           if (part.RequestResource(PartResourceLibrary.ElectricityHashcode,
             (double)(PowerCost * TimeWarp.fixedDeltaTime)) > 0.00001f)
           {
+
+            Fields["ThermalUI"].guiActive = true;
             Fields["IntakeSpeed"].guiActive = true;
             Fields["ScoopUI"].guiActive = true;
 
-            if (Settings.SystemHeatActive)
+            if (Settings.SystemHeatActive && systemHeatModule != null)
             {
-              float loopTemp = (float)systemHeatModule.Fields.GetValue("LoopTemperature");
+              float loopTemp = (float)systemHeatModule.Fields.GetValue("currentLoopTemperature");
               if (loopTemp > ShutdownTemperature)
               {
                 message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Overheated");
@@ -259,6 +280,7 @@ namespace SpaceDust
               }
               else
               {
+                ThermalUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Thermal_Running", SystemEfficiency.Evaluate(loopTemp).ToString("F1"));
                 DoFocusedHarvesting((double)SystemEfficiency.Evaluate(loopTemp));
                 message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Harvesting");
               }
@@ -268,14 +290,15 @@ namespace SpaceDust
               DoFocusedHarvesting(1d);
               message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Harvesting");
             }
-            
-            
+
+
           }
           else
           {
             message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_NoPower");
             Fields["ScoopUI"].guiActive = false;
             Fields["IntakeSpeed"].guiActive = false;
+            Fields["ThermalUI"].guiActive = false;
           }
           if (HarvestAnimationName != "")
           {
@@ -289,10 +312,14 @@ namespace SpaceDust
         }
         else
         {
+          if (Settings.SystemHeatActive && systemHeatModule != null)
+            AddFlux(0f, 0f);
           CurrentPowerConsumption = 0f;
           message = Localizer.Format(("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Disabled"));
           Fields["ScoopUI"].guiActive = false;
           Fields["IntakeSpeed"].guiActive = false;
+
+          Fields["ThermalUI"].guiActive = false;
           if (HarvestAnimationName != "")
           {
             foreach (AnimationState anim in harvestState)
@@ -304,14 +331,18 @@ namespace SpaceDust
         }
         ScannerUI = message;
       }
-      else
+      else if (HighLogic.LoadedSceneIsEditor)
       {
         CurrentPowerConsumption = -PowerCost;
+        if (Settings.SystemHeatActive && systemHeatModule != null)
+        {
+          AddFlux(SystemOutletTemperature, SystemPower);
+        }
       }
     }
     void DoFocusedHarvesting(double scale)
     {
-      
+
       if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0.0001d)
       {
         if (part.vessel.atmDensity < 0.0001d)
@@ -332,7 +363,7 @@ namespace SpaceDust
         float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) * IntakeVelocityScale.Evaluate((float)mach) + IntakeSpeedStatic) * IntakeArea;
         IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", Utils.ToSI(intakeVolume, "G2"));
         ScoopUI = "";
-  
+
         for (int i = 0; i < resources.Count; i++)
         {
           double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
@@ -343,13 +374,13 @@ namespace SpaceDust
 
           if (resourceSample > resources[i].MinHarvestValue)
           {
-            double resAmt = resourceSample * intakeVolume *  1d/resources[i].density *resources[i].BaseEfficiency * scale;
+            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
             if (ScoopUI != "")
               ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
-          
+
         }
         if (ScoopUI == "")
           ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
@@ -363,9 +394,9 @@ namespace SpaceDust
           return;
         }
 
-        
 
-        double orbitSpeedAtAlt = Math.Sqrt(part.vessel.mainBody.gravParameter/ (part.vessel.altitude + part.vessel.mainBody.Radius));
+
+        double orbitSpeedAtAlt = Math.Sqrt(part.vessel.mainBody.gravParameter / (part.vessel.altitude + part.vessel.mainBody.Radius));
 
         Vector3d worldVelocity = part.vessel.obt_velocity;
         Vector3 intakeVector;
@@ -373,8 +404,8 @@ namespace SpaceDust
           intakeVector = this.transform.forward;
         else
           intakeVector = HarvestIntakeTransform.forward;
-        
-        
+
+
         double dot = Vector3d.Dot(worldVelocity.normalized, intakeVector.normalized);
         float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) + IntakeSpeedStatic) * IntakeArea;
         IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", intakeVolume.ToString("G2"));
@@ -391,7 +422,7 @@ namespace SpaceDust
 
           if (resourceSample * intakeVolume * resources[i].BaseEfficiency > resources[i].MinHarvestValue)
           {
-            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency* scale;
+            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
@@ -401,6 +432,19 @@ namespace SpaceDust
           ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
       }
 
+    }
+
+    protected void AddFlux(float outletTemperature, float systemPower)
+    {
+      // Get the right type from the PartModule
+      var moduleType = systemHeatModule.GetType();
+      // Get the parameters and their types
+      object[] parameters = new object[] { ModuleID, outletTemperature, systemPower };
+      Type[] parameterTypes = parameters.ToList().ConvertAll(a => a.GetType()).ToArray();
+      // Get the method
+      MethodInfo reflectedMethod = moduleType.GetMethod("AddFlux", parameterTypes);
+      // Invoke the method
+      reflectedMethod.Invoke(systemHeatModule, parameters);
     }
   }
 

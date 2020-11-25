@@ -1,3 +1,11 @@
+v0.2.0
+------
+- Fixed harvesting that broke last update
+- Added SystemHeat integration: when SystemHeat is installed, ModuleSpaceDustHarvester can add heat to the system, and will overheat
+- Improved ModuleSpaceDustTelescope
+ - Occlusion is now a thing: can't observe planets through planets
+ - Atmoshperic effects are now enabled: discovery rates are modulated by atmosphere (if your observatory is on a planet)
+
 v0.1.5
 ------
 - Tuned Antimatter distributions slightly

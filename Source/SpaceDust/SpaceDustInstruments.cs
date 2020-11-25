@@ -25,7 +25,7 @@ namespace SpaceDust
       {
         SpaceDustInstrument newInst = new SpaceDustInstrument(node);
         Instruments.Add(newInst.Name, newInst);
-        Utils.LogError($"[SpaceDustInstruments]: Added {newInst.Name} to database");
+        Utils.Log($"[SpaceDustInstruments]: Added {newInst.Name} to database");
       }
       Utils.Log($"[SpaceDustInstruments]: Loaded {Instruments.Count} telescope instruments");
     }
@@ -33,6 +33,7 @@ namespace SpaceDust
     public SpaceDustInstrument GetInstrument(string name)
     {
       if (Instruments == null) Load();
+
       if (!Instruments.ContainsKey(name))
       {
         Utils.LogError($"[SpaceDustInstruments]: no defined instrument named {name} exists");
@@ -52,6 +53,7 @@ namespace SpaceDust
     public bool Identifies;
     public double Wavelength;
     public double Sensitivity;
+    public FloatCurve AtmosphereEffect;
     public SpaceDustInstrument(ConfigNode node)
     {
       Load(node);
@@ -67,6 +69,8 @@ namespace SpaceDust
       node.TryGetValue("Wavelength", ref Wavelength);
       node.TryGetValue("Sensitivity", ref Sensitivity);
 
+      AtmosphereEffect = new FloatCurve();
+      AtmosphereEffect.Load(node.GetNode("AtmosphereEffect"));
       Wavelength *= 1E-9;
       Title = Localizer.Format(Title);
     }
@@ -86,8 +90,14 @@ namespace SpaceDust
         results = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_OutOfRange", targetBody.bodyDisplayName);
       else
       {
+        float atmosphereScale = 0f;
+        if (ves.atmDensity > 0.00001)
+        {
+          atmosphereScale = (float)(Utils.CalculateAirMass(ves, targetBody) * ves.mainBody.atmosphereDepth * ves.mainBody.atmDensityASL);
+          Utils.Log($"{atmosphereScale}");
+        }
         
-        float toDiscover = (float)(pxSize* Settings.BaseTelescopeDiscoverRate*Sensitivity/100f);
+        float toDiscover = (float)(pxSize* Settings.BaseTelescopeDiscoverRate*Sensitivity/100f * AtmosphereEffect.Evaluate((float)atmosphereScale));
         if (Discovers)
         {
           SpaceDustScenario.Instance.AddDiscoveryAtBody(ResourceName, targetBody, toDiscover * timeStep);
