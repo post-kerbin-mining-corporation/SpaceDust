@@ -61,6 +61,50 @@ namespace SpaceDust
 
       return scaled.ToString(format) + " " + prefix;
     }
+
+    public static bool CalculateBodyLOS(Vessel ves, CelestialBody target, Transform refXForm, out float angle, out CelestialBody obscuringBody)
+    {
+      bool targetVisible = true;
+      angle = 0f;
+      obscuringBody = null;
+
+      CelestialBody currentBody = FlightGlobals.currentMainBody;
+
+      angle = Vector3.Angle(refXForm.forward, target.transform.position - refXForm.position);
+
+      if (currentBody != target)
+      {
+
+        Vector3 vT = target.position - ves.GetWorldPos3D();
+        Vector3 vC = currentBody.position - ves.GetWorldPos3D();
+        // if true, behind horizon plane
+        if (Vector3.Dot(vT, vC) > (vC.sqrMagnitude - currentBody.Radius * currentBody.Radius))
+        {
+          // if true, obscured
+          if ((Mathf.Pow(Vector3.Dot(vT, vC), 2) / vT.sqrMagnitude) > (vC.sqrMagnitude - currentBody.Radius * currentBody.Radius))
+          {
+            targetVisible = false;
+            obscuringBody = currentBody;
+          }
+        }
+      }
+
+      return targetVisible;
+    }
+
+    public static double CalculateAirMass(Vessel ves, CelestialBody target)
+    {
+
+      double rUnit = ves.mainBody.Radius / ves.mainBody.atmosphereDepth;
+      double yUnit = ves.altitude / ves.mainBody.atmosphereDepth;
+
+      
+      double zenithAngle = Vector3d.Angle(ves.GetWorldPos3D() - ves.mainBody.position,  target.position - ves.mainBody.position)*Mathf.Deg2Rad;
+      
+      double x = Math.Sqrt(Math.Pow(rUnit + yUnit, 2) * Math.Pow(Math.Cos(zenithAngle), 2) + 2d * rUnit * (1d - yUnit) - yUnit * yUnit + 1d) - (rUnit + yUnit) * Math.Cos(zenithAngle);
+
+      return x;
+    }
   }
   public static class MathExtensions
   {
@@ -89,7 +133,7 @@ namespace SpaceDust
       }
       return null;
     }
-    
+
 
 
     /*

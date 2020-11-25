@@ -291,6 +291,7 @@ namespace SpaceDust
         {
           foreach (SpaceDustDiscoveryData data in toDiscover)
           {
+            
             data.discoveryPercent += amount * band.RemoteDiscoveryScale;
             if (data.discoveryPercent >= 100f)
             {

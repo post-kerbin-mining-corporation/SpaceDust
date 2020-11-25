@@ -106,7 +106,7 @@ namespace SpaceDust
 
     public bool CheckDistanceToCenter(double testAltitude, double proximityThreshold)
     {
-      Utils.Log($"{testAltitude}, {Distribution.Center()}, {proximityThreshold}, {Math.Abs(testAltitude - Distribution.Center())}");
+      //Utils.Log($"{testAltitude}, {Distribution.Center()}, {proximityThreshold}, {Math.Abs(testAltitude - Distribution.Center())}");
       if (Math.Abs(testAltitude - Distribution.Center()) < proximityThreshold)
         return true;
       return false;

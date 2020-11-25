@@ -67,6 +67,9 @@ namespace SpaceDust
     // UI field for showing scan status
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Title")]
     public string ScannerUI = "";
+    // UI field for showing scan modifier
+    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Modifier_Title")]
+    public string ModifierUI = "";
 
     // UI field for showing scan status
     [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_None")]
@@ -240,17 +243,43 @@ namespace SpaceDust
           double amt = part.RequestResource(PartResourceLibrary.ElectricityHashcode,
             (double)(PowerCost * TimeWarp.fixedDeltaTime));
           // check power
+          float angle = 0f;
+          CelestialBody obscuringBody = null;
+          
           if (amt > 0.00001)
           {
             ITargetable target = part.vessel.targetObject;
 
             if (target != null)
             {
+              
               try
               {
                 CelestialBody targetBody;
                 targetBody = (CelestialBody)target;
                 Target = targetBody.name;
+                
+                if (!Utils.CalculateBodyLOS(this.vessel, targetBody, transform, out angle, out obscuringBody))
+                {
+                  SetScanUI(false);
+                  //Fields["ModifierUI"].guiActive = false;
+                  ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Blocked", obscuringBody.GetDisplayName());
+                  return;
+                }
+
+                if (this.vessel.atmDensity > 0.0001d)
+                {
+                  
+
+                  //ModifierUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Modifier_InAtmo", atmosphereScale);
+                  //Fields["ModifierUI"].guiActive = true;
+                }
+                else
+                {
+                 // Fields["ModifierUI"].guiActive = false;
+                }
+
+
                 // do scanning
                 ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Observing", part.vessel.targetObject.GetDisplayName());
                 SetScanUI(true);
@@ -270,6 +299,7 @@ namespace SpaceDust
               {
                 Target = ""; 
                 SetScanUI(false);
+               // Fields["ModifierUI"].guiActive = false;
                 ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoTarget");
               }
 
@@ -301,6 +331,7 @@ namespace SpaceDust
         }
         else
         {
+         // Fields["ModifierUI"].guiActive = false;
           CurrentPowerConsumption = 0f;
           ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Disabled");
           SetScanUI(false);
