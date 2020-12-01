@@ -32,7 +32,7 @@ LOCALIZATION
 ============
 
 This mod includes localization support, and includes translations for
-- [LANGUAGE] (KSP forum user [NAME])
+- Chinese (TerrestrisYE)
 
 =========
 LICENSING

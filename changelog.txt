@@ -1,5 +1,6 @@
 v0.2.1
 ------
+- Added Chinese translation
 - Made some fixes related to parsing parts with underscores in their names
 - Aligned SystemHeat related PartInfo blocks with SystemHeat PartInfo styles
 
