@@ -168,9 +168,8 @@ namespace SpaceDust
         }
         if (resources == null || resources.Count == 0)
         {
-          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
-              Single(c => part.partInfo.name == c.name).config.
-              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+          ConfigNode node = Utils.GetModuleConfigNode(part, moduleName);
+          if (node != null)
           OnLoad(node);
         }
 

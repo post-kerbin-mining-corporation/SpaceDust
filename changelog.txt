@@ -1,3 +1,8 @@
+v0.2.1
+------
+- Made some fixes related to parsing parts with underscores in their names
+- Aligned SystemHeat related PartInfo blocks with SystemHeat PartInfo styles
+
 v0.2.0
 ------
 - Fixed harvesting that broke last update

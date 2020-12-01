@@ -172,10 +172,9 @@ namespace SpaceDust
       {
         if (instrumentSlots == null || instrumentSlots.Count == 0)
         {
-          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
-              Single(c => part.partInfo.name == c.name).config.
-              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
-          OnLoad(node);
+          ConfigNode node = Utils.GetModuleConfigNode(part, moduleName);
+          if (node != null)
+            OnLoad(node);
         }
 
         for (int i = 0; i < instrumentSlots.Count; i++)

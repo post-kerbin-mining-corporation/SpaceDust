@@ -141,9 +141,9 @@ namespace SpaceDust
     {
       string msg = "";
       if (Settings.SystemHeatActive)
-        msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header_SystemHeat", 
-          HarvestType.ToString(), 
-          IntakeSpeedStatic.ToString("F1"), 
+        msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header_SystemHeat",
+          HarvestType.ToString(),
+          IntakeSpeedStatic.ToString("F1"),
           PowerCost.ToString("F1"),
           SystemPower.ToString("F0"),
           SystemOutletTemperature.ToString("F0"),
@@ -193,17 +193,16 @@ namespace SpaceDust
       {
         if (resources == null || resources.Count == 0)
         {
-          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
-              Single(c => part.partInfo.name == c.name).config.
-              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
-          OnLoad(node);
+          ConfigNode node = Utils.GetModuleConfigNode(part, moduleName);
+          if (node != null)
+            OnLoad(node);
         }
 
         if (Settings.SystemHeatActive)
         {
           systemHeatModule = this.GetComponents<PartModule>().ToList().Find(x => x.moduleName == "ModuleSystemHeat" && x.Fields.GetValue("moduleID").ToString() == HeatModuleID);
         }
-        
+
       }
     }
 
@@ -256,7 +255,7 @@ namespace SpaceDust
         if (Enabled)
         {
           CurrentPowerConsumption = -PowerCost;
-          
+
           // add heat
           if (Settings.SystemHeatActive && systemHeatModule != null)
             AddFlux(SystemOutletTemperature, SystemPower);
