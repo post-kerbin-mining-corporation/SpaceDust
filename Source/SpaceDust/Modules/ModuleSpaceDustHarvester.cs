@@ -78,6 +78,11 @@ namespace SpaceDust
     [KSPField(isPersistant = false)]
     public String LoopAnimationName;
 
+    [KSPField(isPersistant = false)]
+    public bool CheckOcclusion = true;
+
+    [KSPField(isPersistant = false)]
+    public float RaycastDistance = 3.75f;
 
     // SystemHeat parameters
     [KSPField(isPersistant = false)]
@@ -141,9 +146,9 @@ namespace SpaceDust
     {
       string msg = "";
       if (Settings.SystemHeatActive)
-        msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header_SystemHeat", 
-          HarvestType.ToString(), 
-          IntakeSpeedStatic.ToString("F1"), 
+        msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Info_Header_SystemHeat",
+          HarvestType.ToString(),
+          IntakeSpeedStatic.ToString("F1"),
           PowerCost.ToString("F1"),
           SystemPower.ToString("F0"),
           SystemOutletTemperature.ToString("F0"),
@@ -193,17 +198,16 @@ namespace SpaceDust
       {
         if (resources == null || resources.Count == 0)
         {
-          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
-              Single(c => part.partInfo.name == c.name).config.
-              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
-          OnLoad(node);
+          ConfigNode node = Utils.GetModuleConfigNode(part, moduleName);
+          if (node != null)
+            OnLoad(node);
         }
 
         if (Settings.SystemHeatActive)
         {
           systemHeatModule = this.GetComponents<PartModule>().ToList().Find(x => x.moduleName == "ModuleSystemHeat" && x.Fields.GetValue("moduleID").ToString() == HeatModuleID);
         }
-        
+
       }
     }
 
@@ -256,16 +260,19 @@ namespace SpaceDust
         if (Enabled)
         {
           CurrentPowerConsumption = -PowerCost;
-          
+
           // add heat
           if (Settings.SystemHeatActive && systemHeatModule != null)
             AddFlux(SystemOutletTemperature, SystemPower);
+
+          Fields["ThermalUI"].guiActive = Settings.SystemHeatActive;
+
+
           // check power
           if (part.RequestResource(PartResourceLibrary.ElectricityHashcode,
             (double)(PowerCost * TimeWarp.fixedDeltaTime)) > 0.00001f)
           {
 
-            Fields["ThermalUI"].guiActive = true;
             Fields["IntakeSpeed"].guiActive = true;
             Fields["ScoopUI"].guiActive = true;
 
@@ -343,22 +350,35 @@ namespace SpaceDust
     void DoFocusedHarvesting(double scale)
     {
 
-      if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0.0001d)
+      if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0d)
       {
-        if (part.vessel.atmDensity < 0.0001d)
+        if (part.vessel.atmDensity < 0d)
         {
           ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_NeedsAtmo");
+
+          Fields["ThermalUI"].guiActive = false;
+          Fields["IntakeSpeed"].guiActive = false;
           return;
         }
         Vector3d worldVelocity = part.vessel.srf_velocity;
         double mach = part.vessel.mach;
 
         Vector3 intakeVector;
+        Transform intakeTransform;
         if (HarvestIntakeTransform == null)
-          intakeVector = this.transform.forward;
+          intakeTransform = this.transform;
         else
-          intakeVector = HarvestIntakeTransform.forward;
+          intakeTransform = HarvestIntakeTransform;
 
+        if (CheckOcclusion && Physics.Raycast(intakeTransform.position, intakeTransform.forward, RaycastDistance))
+        {
+          ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Blocked");
+          Fields["ThermalUI"].guiActive = false;
+          Fields["IntakeSpeed"].guiActive = false;
+          return;
+        }
+
+        intakeVector = intakeTransform.forward;
         double dot = Vector3d.Dot(worldVelocity, intakeVector);
         float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) * IntakeVelocityScale.Evaluate((float)mach) + IntakeSpeedStatic) * IntakeArea;
         IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", Utils.ToSI(intakeVolume, "G2"));
@@ -385,12 +405,15 @@ namespace SpaceDust
         if (ScoopUI == "")
           ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
       }
+      
 
-      if (HarvestType == HarvesterType.Exosphere && part.vessel.atmDensity < 0.0001d)
+      if (HarvestType == HarvesterType.Exosphere && part.vessel.atmDensity < 0d)
       {
-        if (part.vessel.atmDensity > 0.0001d)
+        if (part.vessel.atmDensity > 0d)
         {
           ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_NeedsVacuum");
+          Fields["ThermalUI"].guiActive = false;
+          Fields["IntakeSpeed"].guiActive = false;
           return;
         }
 

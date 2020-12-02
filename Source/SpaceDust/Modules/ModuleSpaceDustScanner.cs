@@ -168,9 +168,8 @@ namespace SpaceDust
         }
         if (resources == null || resources.Count == 0)
         {
-          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
-              Single(c => part.partInfo.name == c.name).config.
-              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+          ConfigNode node = Utils.GetModuleConfigNode(part, moduleName);
+          if (node != null)
           OnLoad(node);
         }
 
@@ -205,7 +204,7 @@ namespace SpaceDust
     public bool CheckScanSituation()
     {
       double atmDensity = vessel.atmDensity;
-      if (atmDensity > 0.00001)
+      if (atmDensity > 0d)
       {
         return ScanInAtmosphere;
       }

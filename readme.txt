@@ -1,5 +1,5 @@
 ================
-SPACE DUST 0.2.0
+SPACE DUST 0.2.1
 ================
 
 This is a KSP mod designed to overhaul the atmospheric and exospheric mining experience in KSP. It functions both as a framework, providing part modules and distributions to others, and an actual gameplay mod designed to provide a set of parts focused around atmospheric ISRU in the stock system.
@@ -32,7 +32,7 @@ LOCALIZATION
 ============
 
 This mod includes localization support, and includes translations for
-- [LANGUAGE] (KSP forum user [NAME])
+- Chinese (TerrestrisYE)
 
 =========
 LICENSING

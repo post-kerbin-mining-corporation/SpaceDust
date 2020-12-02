@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using System;
 
@@ -36,7 +37,21 @@ namespace SpaceDust
       // Convert
       return states.ToArray();
     }
+    public static ConfigNode GetModuleConfigNode(Part part, string moduleName)
+    {
+      try
+      {
+        return GameDatabase.Instance.GetConfigs("PART").
+                Single(c => part.partInfo.name.Replace('_', '.') == c.name.Replace('_', '.')).config.
+                GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+      }
+      catch (Exception)
+      {
+        Utils.LogError($"Couldn't get module config for {moduleName} on {part.partInfo.name}");
+        return null;
+      }
 
+    }
     public static string ToSI(double d, string format = null)
     {
       if (d == 0.0)

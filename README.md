@@ -44,10 +44,7 @@ I certainly accept pull requests. Please target all such things to the `dev` bra
 
 For translation instructions please see [Localization Instructions](https://github.com/ChrisAdderley/HeatControl/blob/master/GameData/HeatControl/Localization/Localization.md)
 
-* **Spanish:** KSP forum user fitiales
-* **Russian:** KSP forum user Dr. Jet
-* **German:** KSP forum user Three_Pounds
-* **Portugese**: LianCastro
+* **Chinese:**  TerrestrisYE
 
 ## Licensing
 

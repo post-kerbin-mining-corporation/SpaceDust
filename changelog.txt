@@ -1,3 +1,13 @@
+v0.2.1
+------
+- Added Chinese translation
+- Cleaned up some fields showing in flight when they shouldnt
+- Reduced atmosphere edge threshold from 0.0001 atm to 1E-16 atm.
+- Made some fixes related to parsing parts with underscores in their names
+- Aligned SystemHeat related PartInfo blocks with SystemHeat PartInfo styles
+- Added flag to check occlusion of ModuleSpaceDustHarvester intakes before allowing harvesting (on by default)
+- Fixed some distributions that should have been using useAirDensity not using it
+
 v0.2.0
 ------
 - Fixed harvesting that broke last update
