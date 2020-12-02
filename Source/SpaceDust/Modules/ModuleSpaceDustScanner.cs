@@ -204,7 +204,7 @@ namespace SpaceDust
     public bool CheckScanSituation()
     {
       double atmDensity = vessel.atmDensity;
-      if (atmDensity > 0.00001)
+      if (atmDensity > 0d)
       {
         return ScanInAtmosphere;
       }
