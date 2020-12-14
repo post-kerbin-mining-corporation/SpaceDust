@@ -126,6 +126,12 @@ namespace SpaceDust
       node.TryGetValue("altitudeSquish", ref altitudeSquish);
       node.TryGetEnum<FalloffType>("altFalloffType", ref altitudeFalloff, FalloffType.None);
       node.TryGetEnum<FalloffType>("latFalloffType", ref latitudeFalloff, FalloffType.None);
+
+
+      minimumAltitude *= Settings.GameScale;
+      centerAltitude *= Settings.GameScale;
+      maximumAltitude *= Settings.GameScale;
+      altitudeVariability *= Settings.GameScale;
     }
 
     public override double MaxSize() { return maximumAltitude + BodyRadius; }
