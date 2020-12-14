@@ -1,3 +1,7 @@
+v0.2.2
+------
+- Added a Settings flag for rescalers to use: GameScale (1.0 = stock scale)
+
 v0.2.1
 ------
 - Added Chinese translation

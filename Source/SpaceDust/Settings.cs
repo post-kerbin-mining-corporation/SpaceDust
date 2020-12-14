@@ -29,6 +29,7 @@ namespace SpaceDust
     public static float BaseTelescopeDiscoverRate = .0001f;
     public static float BaseDiscoverScienceReward = 5f;
     public static float BaseIdentifyScienceReward = 5f;
+    public static float GameScale = 1f;
 
     public static int particleFieldBaseCount = 2000;
     public static float particleFieldBaseSize = 2f;
@@ -104,6 +105,7 @@ namespace SpaceDust
         settingsNode.TryGetValue("BaseTelescopeDiscoverRate", ref BaseTelescopeDiscoverRate);
         settingsNode.TryGetValue("BaseDiscoverScienceReward", ref BaseDiscoverScienceReward);
         settingsNode.TryGetValue("BaseIdentifyScienceReward", ref BaseIdentifyScienceReward);
+        settingsNode.TryGetValue("GameScale", ref GameScale);
 
         settingsNode.TryGetValue("particleFieldBaseCount", ref particleFieldBaseCount);
         settingsNode.TryGetValue("particleFieldBaseSize", ref particleFieldBaseSize);
@@ -112,6 +114,8 @@ namespace SpaceDust
         settingsNode.TryGetValue("particleFieldTrailTextureUrl", ref particleFieldTrailTextureUrl);
         settingsNode.TryGetValue("particleFieldMaxParticleCount", ref particleFieldMaxParticleCount);
         settingsNode.TryGetValue("particleFieldMaxViewportParticleScale", ref particleFieldMaxViewportParticleScale);
+
+        Utils.Log($"[Settings]: Game Scale is {GameScale}");
 
         ConfigNode colorNode = settingsNode.GetNode("ResourceColors");
         resourceColors = new Dictionary<string, Color>();
