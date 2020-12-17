@@ -1,3 +1,9 @@
+v0.2.3
+------
+- Corrected exospheric harvester localization
+- Corrected exospheric harvester flipped equality causing doom
+- Tweaked exospheric Antimatter distributions
+
 v0.2.2
 ------
 - Added a Settings flag for rescalers to use: GameScale (1.0 = stock scale)
