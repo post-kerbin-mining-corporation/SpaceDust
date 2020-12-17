@@ -287,7 +287,7 @@ namespace SpaceDust
               }
               else
               {
-                ThermalUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Thermal_Running", SystemEfficiency.Evaluate(loopTemp).ToString("F1"));
+                ThermalUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Thermal_Running", (SystemEfficiency.Evaluate(loopTemp)*100f).ToString("F1"));
                 DoFocusedHarvesting((double)SystemEfficiency.Evaluate(loopTemp));
                 message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Harvesting");
               }
@@ -352,7 +352,7 @@ namespace SpaceDust
 
       if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0d)
       {
-        if (part.vessel.atmDensity < 0d)
+        if (part.vessel.atmDensity <= 0d)
         {
           ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_NeedsAtmo");
 
@@ -407,7 +407,7 @@ namespace SpaceDust
       }
       
 
-      if (HarvestType == HarvesterType.Exosphere && part.vessel.atmDensity < 0d)
+      if (HarvestType == HarvesterType.Exosphere && part.vessel.atmDensity == 0d)
       {
         if (part.vessel.atmDensity > 0d)
         {
@@ -445,7 +445,10 @@ namespace SpaceDust
 
           if (resourceSample * intakeVolume * resources[i].BaseEfficiency > resources[i].MinHarvestValue)
           {
+
             double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
+            if (ScoopUI != "")
+              ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
