@@ -290,7 +290,7 @@ namespace SpaceDust
                     {
                       if (band.CheckDistanceToCenter(vessel.altitude+ vessel.mainBody.Radius, resources[i].IdentifyRange))
                       {
-                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band, vessel.mainBody);
+                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band, vessel.mainBody, true);
                       }
                     }
                   }
@@ -304,7 +304,7 @@ namespace SpaceDust
                     {
                       if (band.Sample(vessel.altitude, vessel.latitude, vessel.longitude) > resources[i].LocalThreshold)
                       {
-                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band, vessel.mainBody);
+                        SpaceDustScenario.Instance.IdentifyResourceBand(resources[i].Name, band, vessel.mainBody, true);
                       }
                     }
                   }
