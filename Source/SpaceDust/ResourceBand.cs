@@ -99,9 +99,9 @@ namespace SpaceDust
       }
 
       if (AlwaysDiscovered || Settings.SetAllDiscovered)
-        SpaceDustScenario.Instance.DiscoverResourceBand(ResourceName, this, associatedBody);
+        SpaceDustScenario.Instance.DiscoverResourceBand(ResourceName, this, associatedBody, false);
       if (AlwaysIdentified || Settings.SetAllIdentified)
-        SpaceDustScenario.Instance.IdentifyResourceBand(ResourceName, this, associatedBody);
+        SpaceDustScenario.Instance.IdentifyResourceBand(ResourceName, this, associatedBody, false);
     }
 
     public bool CheckDistanceToCenter(double testAltitude, double proximityThreshold)

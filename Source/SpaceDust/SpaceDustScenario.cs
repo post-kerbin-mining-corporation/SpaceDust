@@ -166,14 +166,18 @@ namespace SpaceDust
     {
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
-        DiscoverResourceBand(resourceName, band, b.bodyName);
+        DiscoverResourceBand(resourceName, band, b.bodyName, true);
       }
     }
     public void DiscoverResourceBand(string resourceName, ResourceBand band, CelestialBody b)
     {
-      DiscoverResourceBand(resourceName, band, b.bodyName);
+      DiscoverResourceBand(resourceName, band, b.bodyName, true);
     }
-    public void DiscoverResourceBand(string resourceName, ResourceBand band, string bodyName)
+    public void DiscoverResourceBand(string resourceName, ResourceBand band, CelestialBody b, bool addScience)
+    {
+      DiscoverResourceBand(resourceName, band, b.bodyName, addScience);
+    }
+    public void DiscoverResourceBand(string resourceName, ResourceBand band, string bodyName, bool addScience)
     {
       if (!IsDiscovered(resourceName, band.name, bodyName))
       {
@@ -201,7 +205,7 @@ namespace SpaceDust
         }
         Utils.Log($"[SpaceDustScenario]: Discovered {resourceName} in {band.name} at {bodyName}");
 
-        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX)
+        if (addScience && (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX))
         {
           float scienceValue = FlightGlobals.GetBodyByName(bodyName).scienceValues.InSpaceHighDataValue * band.identifyScienceReward;
           Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was discovered");
@@ -215,14 +219,14 @@ namespace SpaceDust
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
       {
 
-        IdentifyResourceBand(resourceName, band, b.bodyName);
+        IdentifyResourceBand(resourceName, band, b.bodyName, true);
       }
     }
-    public void IdentifyResourceBand(string resourceName, ResourceBand band, CelestialBody b)
+    public void IdentifyResourceBand(string resourceName, ResourceBand band, CelestialBody b, bool addScience)
     {
-      IdentifyResourceBand(resourceName, band, b.bodyName);
+      IdentifyResourceBand(resourceName, band, b.bodyName, addScience);
     }
-    public void IdentifyResourceBand(string resourceName, ResourceBand band, string bodyName)
+    public void IdentifyResourceBand(string resourceName, ResourceBand band, string bodyName, bool addScience)
     {
       if (!IsIdentified(resourceName, band.name, bodyName))
       {
@@ -251,7 +255,7 @@ namespace SpaceDust
           ScreenMessages.PostScreenMessage(msg);
         }
         Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {band.name} at {bodyName}");
-        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX)
+        if (addScience && (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX))
         {
           float scienceValue = FlightGlobals.GetBodyByName(bodyName).scienceValues.InSpaceHighDataValue * band.identifyScienceReward;
           Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was identified");
@@ -295,7 +299,7 @@ namespace SpaceDust
             data.discoveryPercent += amount * band.RemoteDiscoveryScale;
             if (data.discoveryPercent >= 100f)
             {
-              DiscoverResourceBand(resourceName, band, bodyName);
+              DiscoverResourceBand(resourceName, band, bodyName, true);
             }
           }
         }
@@ -336,7 +340,7 @@ namespace SpaceDust
             }
             if (data.identifyPercent >= 100f)
             {
-              IdentifyResourceBand(resourceName, band, bodyName);
+              IdentifyResourceBand(resourceName, band, bodyName, true);
             }
           }
         }

@@ -1,3 +1,9 @@
+v0.3.0
+------
+- Marked for KSP 1.11.x
+- Fixed pre-discovered resource distributions granting science at game start
+- Gas Analyzer and Spectrometer are now storeable/placeable parts for 1.11 inventories
+
 v0.2.3
 ------
 - Corrected exospheric harvester localization
