@@ -18,14 +18,16 @@ namespace SpaceDust
       Instance = this;
       drawnFields = new List<ParticleField>();
       GameEvents.OnMapEntered.Add(new EventVoid.OnEvent(OnMapEntered));
+      GameEvents.OnMapExited.Add(new EventVoid.OnEvent(OnMapExited));
       GameEvents.OnMapFocusChange.Add(new EventData<MapObject>.OnEvent( OnMapFocusChange));
       GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(onGameSceneLoadRequested));
-
     }
     protected void OnDestroy()
     {
       GameEvents.OnMapEntered.Remove(OnMapEntered);
+      GameEvents.OnMapExited.Remove(OnMapExited);
       GameEvents.OnMapFocusChange.Remove(OnMapFocusChange);
+      GameEvents.onGameSceneLoadRequested.Remove(onGameSceneLoadRequested);
     }
     public void onGameSceneLoadRequested(GameScenes scenes)
     {
@@ -43,6 +45,13 @@ namespace SpaceDust
         body = PlanetariumCamera.fetch.target.vessel.mainBody;
       }
       RegenerateBodyFields(body);
+    }
+    public void OnMapExited()
+    {
+      if (Settings.DebugOverlay)
+        Utils.Log($"[MapOverlay] Exiting map view");
+
+      RemoveBodyFields();
     }
 
     public void OnMapFocusChange(MapObject mapObject)
@@ -107,7 +116,8 @@ namespace SpaceDust
     {
 
 
-      
+
+      Utils.Log($"[MapOverlay]: Generating fields for {resourceName} around {body.name}");
       foreach (ResourceBand b in SpaceDustResourceMap.Instance.GetBodyDistributions(body, resourceName))
       {
         bool discovered = SpaceDustScenario.Instance.IsDiscovered(resourceName, b.name, body);
@@ -125,7 +135,8 @@ namespace SpaceDust
         field.SetVisible(ToolbarUI.Instance.IsVisible(resourceName));
         drawnFields.Add(field);
 
-     
+        Utils.Log($"[MapOverlay]: Generated field for {body.name}.{b.name}");
+
       }
       
     }

@@ -136,6 +136,8 @@ namespace SpaceDust
 
         ConfigNode shownNodes = settingsNode.GetNode("ResourceVisibilities");
         visibleResources = shownNodes.GetValuesList("name");
+        Utils.Log($"[Settings]: Resources configured as visible are {String.Join(", ", visibleResources.ToArray())}");
+
       }
       else
       {

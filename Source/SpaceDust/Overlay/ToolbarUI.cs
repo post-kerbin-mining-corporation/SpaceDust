@@ -29,12 +29,13 @@ namespace SpaceDust
 
     protected virtual void Awake()
     {
-      if (HighLogic.LoadedSceneIsFlight)
+      if (HighLogic.LoadedSceneHasPlanetarium)
       {
         GameEvents.onGUIApplicationLauncherReady.Add(OnGUIAppLauncherReady);
         GameEvents.onGUIApplicationLauncherDestroyed.Add(OnGUIAppLauncherDestroyed);
 
         GameEvents.OnMapEntered.Add(new EventVoid.OnEvent(OnMapEntered));
+        GameEvents.OnMapExited.Add(new EventVoid.OnEvent(OnMapExited));
         GameEvents.OnMapFocusChange.Add(new EventData<MapObject>.OnEvent(OnMapFocusChange));
         GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
       }
@@ -54,6 +55,12 @@ namespace SpaceDust
         body = PlanetariumCamera.fetch.target.vessel.mainBody;
       }
       RefreshResources(body);
+    }
+    public void OnMapExited()
+    {
+      if (Settings.DebugUI)
+        Utils.Log($"[ToolbarUI] Exiting map view");
+      toolbarPanel.SetVisible(false);
     }
     public void OnMapFocusChange(MapObject mapObject)
     {
@@ -154,11 +161,11 @@ namespace SpaceDust
       if (showWindow && toolbarPanel)
       {
 
-        if (HighLogic.LoadedSceneIsFlight)
+        if (HighLogic.LoadedSceneHasPlanetarium)
         {
-
           toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width + 50f, toolbarPanel.rect.rect.height, 0f);
         }
+        
       }
     }
 
@@ -175,8 +182,8 @@ namespace SpaceDust
       GameEvents.OnMapEntered.Remove(OnMapEntered);
       GameEvents.OnMapFocusChange.Remove(OnMapFocusChange);
 
-      GameEvents.OnMapEntered.Remove(OnMapEntered);
-      GameEvents.OnMapFocusChange.Remove(OnMapFocusChange);
+      GameEvents.OnMapExited.Remove(OnMapExited);
+      
     }
 
     protected void OnToolbarButtonToggle()
@@ -198,7 +205,7 @@ namespace SpaceDust
             DummyVoid,
             DummyVoid,
             DummyVoid,
-            ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
+            ApplicationLauncher.AppScenes.MAPVIEW ,
             (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
       CreateToolbarPanel();
@@ -240,7 +247,7 @@ namespace SpaceDust
             DummyVoid,
             DummyVoid,
             DummyVoid,
-            ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
+            ApplicationLauncher.AppScenes.MAPVIEW,
             (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
 

@@ -99,6 +99,7 @@ namespace SpaceDust
       targetCount = (int)(Mathf.Clamp(Settings.particleFieldBaseCount*band.ParticleCountScale,1f, Settings.particleFieldMaxParticleCount));
       spinRate = band.ParticleRotateRate;
 
+      
       resName = resourceName;
       resBand = band;
       particleRenderer.maxParticleSize = Settings.particleFieldMaxViewportParticleScale;
@@ -115,6 +116,7 @@ namespace SpaceDust
 
       particleBuffer = new ParticleSystem.Particle[particleField.main.maxParticles];
       fieldGenerated = true;
+      //Utils.Log($"[Field]: Created new field at {scaledSpacePosition}");
     }
     List<ParticleSystem.Particle> GenerateParticles(int count)
     {

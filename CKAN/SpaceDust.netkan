@@ -5,10 +5,10 @@
     "$kref":        "#/ckan/github/post-kerbin-mining-corporation/SpaceDust",
     "$vref":        "#/ckan/ksp-avc",
     "abstract": "A mod supplying a new experience for atmospheric and exospheric resource harvesting. Includes a new harvesting system, displays, resource distributions and parts.",
-    "author": "Chris Adderley (Nertea)",
-    "license":      "CC-BY-NC-SA-4",
+    "author": "Nertea (Chris Adderley)",
+    "license":      "CC-BY-NC-SA-4.0",
     "resources": {
-        "homepage":   "https://forum.kerbalspaceprogram.com/index.php?/topic/197723",
+        "homepage":   "https://forum.kerbalspaceprogram.com/index.php?/topic/197723-1",
         "repository": "https://github.com/post-kerbin-mining-corporation/SpaceDust"
     },
     "depends": [
@@ -18,5 +18,11 @@
     "install": [ {
         "find":       "SpaceDust",
         "install_to": "GameData"
-    } ]
+    } ],
+    "tags": [
+        "parts",
+        "plugin",
+        "resources",
+        "science" 
+    ]
 }
