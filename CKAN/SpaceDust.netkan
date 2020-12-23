@@ -18,5 +18,11 @@
     "install": [ {
         "find":       "SpaceDust",
         "install_to": "GameData"
-    } ]
+    } ],
+    "tags": [
+        "parts",
+        "plugin",
+        "resources",
+        "science" 
+    ]
 }
