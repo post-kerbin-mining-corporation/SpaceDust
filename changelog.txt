@@ -1,6 +1,7 @@
 v0.3.2
 ------
 - Adjusted ArgonGas distribution 
+- Disabled cargo partmodule in KSP < 1.11
 
 v0.3.1
 ------
