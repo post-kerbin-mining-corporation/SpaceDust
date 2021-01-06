@@ -20,8 +20,22 @@ namespace SpaceDust
       Settings.Load();
       if (HighLogic.LoadedSceneIsGame)
       {
-        SpaceDustInstruments.Instance.Load();
-        SpaceDustResourceMap.Instance.Load();
+        try
+        {
+          SpaceDustInstruments.Instance.Load();
+        }
+        catch (TypeLoadException except)
+        {
+          Utils.LogError($"[SpaceDust] Critical error loading SpaceDustInstrument from confignode {except.Message}");
+        }
+        try
+        {
+          SpaceDustResourceMap.Instance.Load();
+        }
+        catch (TypeLoadException except)
+        {
+          Utils.LogError($"[SpaceDust] Critical error loading SpaceDustResource from configNode {except.Message}");
+        }
       }
     }
   }
@@ -44,11 +58,18 @@ namespace SpaceDust
       List<ResourceDistribution> distros = new List<ResourceDistribution>();
       foreach (ConfigNode node in resourceDistributionNodes)
       {
-        distros.Add(new ResourceDistribution(node));
+        try
+        {
+          distros.Add(new ResourceDistribution(node));
+        }
+        catch (Exception)
+        {
+          throw new TypeLoadException(node.ToString());
+        }
       }
       Utils.Log($"[SpaceDustResourceMap]: Loaded {distros.Count} resource distributions");
       List<string> bodyKeys = distros.Select(x => x.Body).Distinct().ToList();
-      
+
       foreach (string bodyKey in bodyKeys)
       {
         List<ResourceDistribution> bodyDists = distros.FindAll(x => x.Body == bodyKey).ToList();
@@ -74,7 +95,7 @@ namespace SpaceDust
         {
           if (Resources[body.name][i].ResourceName == ResourceName)
           {
-            sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude)/PartResourceLibrary.Instance.GetDefinition(ResourceName).density;
+            sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude) / PartResourceLibrary.Instance.GetDefinition(ResourceName).density;
             //Utils.Log($"Sampled {ResourceName} of  {sampledTotal}");
           }
         }
@@ -112,7 +133,7 @@ namespace SpaceDust
         for (int i = 0; i < Resources[body.name].Count; i++)
         {
           if (Resources[body.name][i].ResourceName == resourceName)
-            dist =Resources[body.name][i].Bands;
+            dist = Resources[body.name][i].Bands;
 
         }
       }
