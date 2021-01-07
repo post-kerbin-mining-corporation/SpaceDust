@@ -3,6 +3,7 @@ v0.3.3
 - Fixed tech node of gas scanner
 - Better exception handling and logging for broken distributions and instruments
 - Better default values for un/misconfigured distributions and instruments
+- Fixed an issue that would cause scanned/harvested resources to not understand resource density correctly. 
 
 v0.3.2
 ------

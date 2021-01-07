@@ -36,7 +36,6 @@ namespace SpaceDust
       c.TryGetValue("LocalThreshold", ref LocalThreshold);
       c.TryGetValue("DiscoverRange", ref DiscoverRange);
       c.TryGetValue("IdentifyRange", ref IdentifyRange);
-      density = PartResourceLibrary.Instance.GetDefinition(Name).density;
 
 
     }
@@ -171,6 +170,10 @@ namespace SpaceDust
           ConfigNode node = Utils.GetModuleConfigNode(part, moduleName);
           if (node != null)
           OnLoad(node);
+        }
+        foreach (ScannedResource res in resources)
+        {
+          res.density = PartResourceLibrary.Instance.GetDefinition(res.Name).density;
         }
 
       }
