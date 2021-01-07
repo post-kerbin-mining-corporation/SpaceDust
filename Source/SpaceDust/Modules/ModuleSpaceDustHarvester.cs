@@ -16,7 +16,7 @@ namespace SpaceDust
   }
   public class HarvestedResource
   {
-    public string Name;
+    public string Name = "undefined";
     // The basic efficiency, applied at local V = 0
     public float BaseEfficiency;
     public double MinHarvestValue = 0.0001d;
@@ -30,7 +30,6 @@ namespace SpaceDust
       node.TryGetValue("Name", ref Name);
       node.TryGetValue("BaseEfficiency", ref BaseEfficiency);
       node.TryGetValue("MinHarvestValue", ref MinHarvestValue);
-      density = PartResourceLibrary.Instance.GetDefinition(Name).density;
     }
 
     public string GenerateInfoString()
@@ -202,6 +201,18 @@ namespace SpaceDust
           if (node != null)
             OnLoad(node);
         }
+        foreach (HarvestedResource res in resources)
+        {
+          try
+          {
+            res.density = PartResourceLibrary.Instance.GetDefinition(res.Name).density;
+          }
+          catch (NullReferenceException)
+          {
+            Utils.LogError($"[ModuleSpaceDustHarvester] Couldn't find resource definition for {res.Name}");
+          }
+        }
+        
 
         if (Settings.SystemHeatActive)
         {
@@ -218,8 +229,12 @@ namespace SpaceDust
       {
         resources = new List<HarvestedResource>();
         foreach (ConfigNode resNode in node.GetNodes("HARVESTED_RESOURCE"))
-        {
-          resources.Add(new HarvestedResource(resNode));
+        { 
+          HarvestedResource res = new HarvestedResource(resNode);
+          if (res.Name == "" || String.IsNullOrEmpty(res.Name) || res.Name == "undefined")
+            return;
+
+            resources.Add(res);
         }
       }
     }

@@ -19,15 +19,24 @@ namespace SpaceDust
     }
     public void Load()
     {
+
       ConfigNode[] SpaceDustInstrument = GameDatabase.Instance.GetConfigNodes("SPACEDUST_INSTRUMENT");
       Instruments = new Dictionary<string, SpaceDustInstrument>();
       foreach (ConfigNode node in SpaceDustInstrument)
       {
-        SpaceDustInstrument newInst = new SpaceDustInstrument(node);
-        Instruments.Add(newInst.Name, newInst);
-        Utils.Log($"[SpaceDustInstruments]: Added {newInst.Name} to database");
+        try
+        {
+          SpaceDustInstrument newInst = new SpaceDustInstrument(node);
+          Instruments.Add(newInst.Name, newInst);
+          Utils.Log($"[SpaceDustInstruments]: Added {newInst.Name} to database");
+        }
+        catch (Exception)
+        {
+          throw new TypeLoadException(node.ToString());
+        }
       }
       Utils.Log($"[SpaceDustInstruments]: Loaded {Instruments.Count} telescope instruments");
+
     }
 
     public SpaceDustInstrument GetInstrument(string name)
@@ -69,8 +78,15 @@ namespace SpaceDust
       node.TryGetValue("Wavelength", ref Wavelength);
       node.TryGetValue("Sensitivity", ref Sensitivity);
 
+      // Configure the default curve
       AtmosphereEffect = new FloatCurve();
-      AtmosphereEffect.Load(node.GetNode("AtmosphereEffect"));
+      AtmosphereEffect.Add(0f, 1f);
+      AtmosphereEffect.Add(70000f, 5f);
+      AtmosphereEffect.Add(500000f, 0f);
+      ConfigNode floatCurveNode = new ConfigNode();
+      if (node.TryGetNode("AtmosphereEffect", ref floatCurveNode))
+        AtmosphereEffect.Load(floatCurveNode);
+
       Wavelength *= 1E-9;
       Title = Localizer.Format(Title);
     }
@@ -95,8 +111,8 @@ namespace SpaceDust
         {
           atmosphereScale = (float)(Utils.CalculateAirMass(ves, targetBody) * ves.mainBody.atmosphereDepth * ves.mainBody.atmDensityASL);
         }
-        
-        float toDiscover = (float)(pxSize* Settings.BaseTelescopeDiscoverRate*Sensitivity/100f * AtmosphereEffect.Evaluate((float)atmosphereScale));
+
+        float toDiscover = (float)(pxSize * Settings.BaseTelescopeDiscoverRate * Sensitivity / 100f * AtmosphereEffect.Evaluate((float)atmosphereScale));
         if (Discovers)
         {
           SpaceDustScenario.Instance.AddDiscoveryAtBody(ResourceName, targetBody, toDiscover * timeStep);
@@ -107,7 +123,7 @@ namespace SpaceDust
         }
 
         results = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Instrument_Scanning",
-          
+
           (toDiscover).ToString("F3"));
       }
       return results;

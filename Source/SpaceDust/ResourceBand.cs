@@ -40,7 +40,7 @@ namespace SpaceDust
     {
       ResourceName = resourceName;
       string distName = "Uniform";
-      densityCurve = new FloatCurve();
+      
 
       node.TryGetValue("name", ref name);
       node.TryGetValue("title", ref title);
@@ -66,9 +66,19 @@ namespace SpaceDust
 
       title = Localizer.Format(title);
 
+      densityCurve = new FloatCurve();
+
       if (useAirDensity)
       {
-        densityCurve.Load(node.GetNode("densityCurve"));
+        densityCurve.Add(0f,0f);
+        densityCurve.Add(1f, 1f);
+        densityCurve.Add(12f, 12f);
+        ConfigNode densCurve = new ConfigNode();
+        if (node.TryGetNode("densityCurve",  ref densCurve))
+        {
+
+          densityCurve.Load(densCurve);
+        }
       }
 
       if (distName == "Uniform")
