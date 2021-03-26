@@ -91,8 +91,6 @@ namespace SpaceDust
       foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
       {
         // Find telescope components
-
-
         Part part_prefab = PartLoader.getPartInfoByName(protoPart.partName).partPrefab;
         var module_prefabs = part_prefab.FindModulesImplementing<PartModule>();
 
@@ -102,12 +100,13 @@ namespace SpaceDust
           if (Settings.DebugBackground)
             Utils.Log($"[SpaceDustBackgroundSim]: Found ModuleSpaceDustTelescope on {vessel.name} that is unloaded, adding to background simulation");
 
-         
           var telescopePrefab = module_prefabs.Find(x => x.moduleName == "ModuleSpaceDustTelescope");
-          
 
-          SpaceDustTelescopeBackground protoTelescope = new SpaceDustTelescopeBackground(vessel, telescopeProto,telescopePrefab);
-          backgroundTelescopes.Add(protoTelescope);
+          if (telescopePrefab != null)
+          {
+            SpaceDustTelescopeBackground protoTelescope = new SpaceDustTelescopeBackground(vessel, telescopeProto, telescopePrefab);
+            backgroundTelescopes.Add(protoTelescope);
+          }
         }
 
         ProtoPartModuleSnapshot harvesterProto = protoPart.modules.Find(x => x.moduleName == "ModuleSpaceDustHarvester");

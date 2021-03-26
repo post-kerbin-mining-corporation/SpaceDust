@@ -1,3 +1,9 @@
+v0.4.0
+------
+- Resources are visible in the tracking station
+- Fixed an issue where null execptions would happen on switching to and from a Kerbal
+- Rebalanced some resource distributions that were way too high.
+
 v0.3.3
 ------
 - Fixed tech node of gas scanner
