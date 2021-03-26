@@ -36,7 +36,12 @@ namespace SpaceDust
       main.maxParticles = Settings.particleFieldMaxParticleCount;
     
       particleColor = Color.white;
-      particleField.gameObject.layer = 24 ;
+      if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+      {
+        particleField.gameObject.layer = 10;
+      }
+      else
+        particleField.gameObject.layer = 24;
     }
 
     float ticker = 0;

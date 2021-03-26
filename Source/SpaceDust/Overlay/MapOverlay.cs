@@ -124,10 +124,21 @@ namespace SpaceDust
         bool ided = SpaceDustScenario.Instance.IsIdentified(resourceName,b.name, body);
         GameObject fieldObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         ParticleField field = fieldObj.AddComponent<ParticleField>();
-        field.transform.SetParent(body.MapObject.trf);
-        field.transform.localScale = Vector3.one;
-        field.transform.localPosition = Vector3.zero;
 
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+          Utils.Log($"[MapOverlay]: Generating fields for {b.name} FLIGHT");
+          field.transform.SetParent(body.MapObject.trf);
+          field.transform.localScale = Vector3.one;
+          field.transform.localPosition = Vector3.zero;
+        }
+        if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+        {
+          Utils.Log($"[MapOverlay]: Generating fields for {b.name} TRACKER BRO");
+          field.transform.SetParent(body.MapObject.trf);
+          field.transform.localScale = Vector3.one;
+          field.transform.localPosition = Vector3.zero;
+        }
 
         if (discovered || ided)
           field.CreateField(b, resourceName, discovered, ided, body.MapObject.transform.position);

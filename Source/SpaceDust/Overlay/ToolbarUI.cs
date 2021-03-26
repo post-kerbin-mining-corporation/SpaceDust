@@ -60,7 +60,8 @@ namespace SpaceDust
     {
       if (Settings.DebugUI)
         Utils.Log($"[ToolbarUI] Exiting map view");
-      toolbarPanel.SetVisible(false);
+      if (toolbarPanel != null)
+        toolbarPanel.SetVisible(false);
     }
     public void OnMapFocusChange(MapObject mapObject)
     {
@@ -91,7 +92,8 @@ namespace SpaceDust
             if (!resourceVisibilities.ContainsKey(res))
               resourceVisibilities.Add(res, false);
 
-            toolbarPanel.AddResourceEntry(body, res, SpaceDustResourceMap.Instance.GetBodyDistributions(body, res), resourceVisibilities[res]);
+            if (toolbarPanel != null)
+              toolbarPanel.AddResourceEntry(body, res, SpaceDustResourceMap.Instance.GetBodyDistributions(body, res), resourceVisibilities[res]);
           }
         }
       }
@@ -205,7 +207,7 @@ namespace SpaceDust
             DummyVoid,
             DummyVoid,
             DummyVoid,
-            ApplicationLauncher.AppScenes.MAPVIEW ,
+            ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
             (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
       CreateToolbarPanel();
@@ -247,7 +249,7 @@ namespace SpaceDust
             DummyVoid,
             DummyVoid,
             DummyVoid,
-            ApplicationLauncher.AppScenes.MAPVIEW,
+            ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
             (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
 
