@@ -1,3 +1,7 @@
+v0.4.1
+------
+- Updated to use SystemHeat 0.4+ API
+
 v0.4.0
 ------
 - Updated B9PartSwitch to 2.18.0

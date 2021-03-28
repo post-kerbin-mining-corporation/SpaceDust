@@ -278,7 +278,7 @@ namespace SpaceDust
 
           // add heat
           if (Settings.SystemHeatActive && systemHeatModule != null)
-            AddFlux(SystemOutletTemperature, SystemPower);
+            AddFlux(SystemOutletTemperature, SystemPower, true);
 
           Fields["ThermalUI"].guiActive = Settings.SystemHeatActive;
 
@@ -335,7 +335,7 @@ namespace SpaceDust
         else
         {
           if (Settings.SystemHeatActive && systemHeatModule != null)
-            AddFlux(0f, 0f);
+            AddFlux(0f, 0f, false);
           CurrentPowerConsumption = 0f;
           message = Localizer.Format(("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Disabled"));
           Fields["ScoopUI"].guiActive = false;
@@ -358,7 +358,7 @@ namespace SpaceDust
         CurrentPowerConsumption = -PowerCost;
         if (Settings.SystemHeatActive && systemHeatModule != null)
         {
-          AddFlux(SystemOutletTemperature, SystemPower);
+          AddFlux(SystemOutletTemperature, SystemPower, true);
         }
       }
     }
@@ -475,12 +475,12 @@ namespace SpaceDust
 
     }
 
-    protected void AddFlux(float outletTemperature, float systemPower)
+    protected void AddFlux(float outletTemperature, float systemPower, bool addToNominal)
     {
       // Get the right type from the PartModule
       var moduleType = systemHeatModule.GetType();
       // Get the parameters and their types
-      object[] parameters = new object[] { ModuleID, outletTemperature, systemPower };
+      object[] parameters = new object[] { ModuleID, outletTemperature, systemPower, addToNominal };
       Type[] parameterTypes = parameters.ToList().ConvertAll(a => a.GetType()).ToArray();
       // Get the method
       MethodInfo reflectedMethod = moduleType.GetMethod("AddFlux", parameterTypes);
