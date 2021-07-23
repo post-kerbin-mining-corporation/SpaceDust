@@ -20,7 +20,7 @@ namespace SpaceDust
       node.TryGetValue("name", ref SlotName);
       node.TryGetValue("Instrument", ref InstrumentName);
       if (InstrumentName != "None")
-      Instrument = SpaceDustInstruments.Instance.GetInstrument(InstrumentName);
+        Instrument = SpaceDustInstruments.Instance.GetInstrument(InstrumentName);
     }
     public InstrumentSlot(string name, string inst)
     {
@@ -48,6 +48,10 @@ namespace SpaceDust
     // Cost per second to run the telescope
     [KSPField(isPersistant = true)]
     public float PowerCost = 1f;
+
+    // Minimum EC to leave when harvesting
+    [KSPField(isPersistant = false)]
+    public float minResToLeave = 1.0f;
 
     // Current scan target
     [KSPField(isPersistant = true)]
@@ -115,7 +119,7 @@ namespace SpaceDust
     public override string GetInfo()
     {
       string msg = "";
-      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Info_Header", PowerCost.ToString("F1"), (Mathf.Rad2Deg*FieldOfView).ToString("F2"), ObjectiveDiameter.ToString("F1"));
+      msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Info_Header", PowerCost.ToString("F1"), (Mathf.Rad2Deg * FieldOfView).ToString("F2"), ObjectiveDiameter.ToString("F1"));
 
       return msg;
     }
@@ -162,7 +166,7 @@ namespace SpaceDust
     public override void OnAwake()
     {
       base.OnAwake();
-      
+
     }
     public void Start()
     {
@@ -227,7 +231,7 @@ namespace SpaceDust
       for (int i = 0; i < instrumentSlots.Count; i++)
       {
         if (instrumentSlots[i].Instrument != null)
-          Fields[$"InstrumentUI_{i+1}"].guiActive = on;
+          Fields[$"InstrumentUI_{i + 1}"].guiActive = on;
         else
           Fields[$"InstrumentUI_{i + 1}"].guiActive = false;
       }
@@ -239,66 +243,80 @@ namespace SpaceDust
         if (Enabled)
         {
           CurrentPowerConsumption = -PowerCost;
-          double amt = part.RequestResource(PartResourceLibrary.ElectricityHashcode,
-            (double)(PowerCost * TimeWarp.fixedDeltaTime));
-          // check power
+
+          vessel.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out double currentEC, out double maxEC);
+          double chargeRequest = PowerCost * TimeWarp.fixedDeltaTime;
+
           float angle = 0f;
           CelestialBody obscuringBody = null;
-          
-          if (amt > 0.00001)
+
+          // check power
+          if (currentEC > chargeRequest + minResToLeave)
           {
-            ITargetable target = part.vessel.targetObject;
+            double consumption = part.RequestResource(PartResourceLibrary.ElectricityHashcode, chargeRequest);
+            if (consumption >= chargeRequest - 0.0001)
 
-            if (target != null)
             {
-              
-              try
+              ITargetable target = part.vessel.targetObject;
+
+              if (target != null)
               {
-                CelestialBody targetBody;
-                targetBody = (CelestialBody)target;
-                Target = targetBody.name;
-                
-                if (!Utils.CalculateBodyLOS(this.vessel, targetBody, transform, out angle, out obscuringBody))
-                {
-                  SetScanUI(false);
-                  //Fields["ModifierUI"].guiActive = false;
-                  ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Blocked", obscuringBody.GetDisplayName());
-                  return;
-                }
 
-                if (this.vessel.atmDensity > 0.0001d)
+                try
                 {
-                  
+                  CelestialBody targetBody;
+                  targetBody = (CelestialBody)target;
+                  Target = targetBody.name;
 
-                  //ModifierUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Modifier_InAtmo", atmosphereScale);
-                  //Fields["ModifierUI"].guiActive = true;
-                }
-                else
-                {
-                 // Fields["ModifierUI"].guiActive = false;
-                }
-
-
-                // do scanning
-                ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Observing", part.vessel.targetObject.GetDisplayName());
-                SetScanUI(true);
-                for (int i = 0; i < instrumentSlots.Count; i++)
-                {
-                  if (instrumentSlots[i].Instrument != null)
+                  if (!Utils.CalculateBodyLOS(this.vessel, targetBody, transform, out angle, out obscuringBody))
                   {
-                    
-                    string response = instrumentSlots[i].Instrument.Scan(part.vessel, (CelestialBody)part.vessel.targetObject, ObjectiveDiameter, FieldOfView, TimeWarp.fixedDeltaTime);
-                    Fields[$"InstrumentUI_{i + 1}"].SetValue(response, this);
+                    SetScanUI(false);
+                    //Fields["ModifierUI"].guiActive = false;
+                    ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Blocked", obscuringBody.GetDisplayName());
+                    return;
                   }
-                  
+
+                  if (this.vessel.atmDensity > 0.0001d)
+                  {
+
+
+                    //ModifierUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Modifier_InAtmo", atmosphereScale);
+                    //Fields["ModifierUI"].guiActive = true;
+                  }
+                  else
+                  {
+                    // Fields["ModifierUI"].guiActive = false;
+                  }
+
+
+                  // do scanning
+                  ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Observing", part.vessel.targetObject.GetDisplayName());
+                  SetScanUI(true);
+                  for (int i = 0; i < instrumentSlots.Count; i++)
+                  {
+                    if (instrumentSlots[i].Instrument != null)
+                    {
+
+                      string response = instrumentSlots[i].Instrument.Scan(part.vessel, (CelestialBody)part.vessel.targetObject, ObjectiveDiameter, FieldOfView, TimeWarp.fixedDeltaTime);
+                      Fields[$"InstrumentUI_{i + 1}"].SetValue(response, this);
+                    }
+
+                  }
+
+                }
+                catch (InvalidCastException)
+                {
+                  Target = "";
+                  SetScanUI(false);
+                  // Fields["ModifierUI"].guiActive = false;
+                  ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoTarget");
                 }
 
               }
-              catch (InvalidCastException)
+              else
               {
-                Target = ""; 
+                Target = "";
                 SetScanUI(false);
-               // Fields["ModifierUI"].guiActive = false;
                 ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoTarget");
               }
 
@@ -307,9 +325,8 @@ namespace SpaceDust
             {
               Target = "";
               SetScanUI(false);
-              ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoTarget");
+              ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoPower");
             }
-
           }
           else
           {
@@ -330,7 +347,7 @@ namespace SpaceDust
         }
         else
         {
-         // Fields["ModifierUI"].guiActive = false;
+          // Fields["ModifierUI"].guiActive = false;
           CurrentPowerConsumption = 0f;
           ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Disabled");
           SetScanUI(false);

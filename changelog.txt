@@ -1,3 +1,9 @@
+v0.4.2
+------
+- KSP 1.12
+- Fixed scanners, harvesters and telescopes still being allowed to work when power was lower than required
+- Added a screen message that posts when a converter overheats (SystemHeat integration)
+
 v0.4.1
 ------
 - Updated to use SystemHeat 0.4+ API
