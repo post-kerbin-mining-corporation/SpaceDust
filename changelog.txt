@@ -1,3 +1,11 @@
+v0.4.2
+------
+- KSP 1.12
+- Fixed scanners, harvesters and telescopes still being allowed to work when power was lower than required, now resources will not be mined
+- Added a screen message that posts when a converter overheats (with SystemHeat installed)
+- Fixed orbit velocity being calculated incorrectly for exospheric harvesters in the background
+- Fixed density of resources not being accounted for correctly for all harvesters in the background, leading to wildly low (or high) collection rates for resources outside of the 'normal' bounds
+
 v0.4.1
 ------
 - Updated to use SystemHeat 0.4+ API

@@ -52,6 +52,10 @@ namespace SpaceDust
     [KSPField(isPersistant = true)]
     public float CurrentPowerConsumption = 1f;
 
+    // Minimum EC to leave when harvesting
+    [KSPField(isPersistant = false)]
+    public float minResToLeave = 0.1f;
+
     // The velocity to use when the intake is static
     [KSPField(isPersistant = false)]
     public float IntakeSpeedStatic = 0f;
@@ -282,38 +286,50 @@ namespace SpaceDust
 
           Fields["ThermalUI"].guiActive = Settings.SystemHeatActive;
 
-
+          vessel.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out double currentEC,  out double maxEC);
+          double chargeRequest = PowerCost * TimeWarp.fixedDeltaTime;
+          
           // check power
-          if (part.RequestResource(PartResourceLibrary.ElectricityHashcode,
-            (double)(PowerCost * TimeWarp.fixedDeltaTime)) > 0.00001f)
+          if (currentEC > chargeRequest + minResToLeave)
           {
+            double consumption = part.RequestResource(PartResourceLibrary.ElectricityHashcode, chargeRequest);
+            if (consumption >= chargeRequest - 0.0001)
 
-            Fields["IntakeSpeed"].guiActive = true;
-            Fields["ScoopUI"].guiActive = true;
-
-            if (Settings.SystemHeatActive && systemHeatModule != null)
             {
-              float loopTemp = (float)systemHeatModule.Fields.GetValue("currentLoopTemperature");
-              if (loopTemp > ShutdownTemperature)
-              {
-                message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Overheated");
+              Fields["IntakeSpeed"].guiActive = true;
+              Fields["ScoopUI"].guiActive = true;
 
-                Enabled = false;
+              if (Settings.SystemHeatActive && systemHeatModule != null)
+              {
+                float loopTemp = (float)systemHeatModule.Fields.GetValue("currentLoopTemperature");
+                if (loopTemp > ShutdownTemperature)
+                {
+                  message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Overheated");
+                  ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Message_Overheated", ShutdownTemperature.ToString("F0")), 5f, ScreenMessageStyle.UPPER_CENTER);
+                  ScreenMessages.PostScreenMessage(msg);
+
+                  Enabled = false;
+                }
+                else
+                {
+                  ThermalUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Thermal_Running", (SystemEfficiency.Evaluate(loopTemp) * 100f).ToString("F1"));
+                  DoFocusedHarvesting((double)SystemEfficiency.Evaluate(loopTemp));
+                  message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Harvesting");
+                }
               }
               else
               {
-                ThermalUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Thermal_Running", (SystemEfficiency.Evaluate(loopTemp)*100f).ToString("F1"));
-                DoFocusedHarvesting((double)SystemEfficiency.Evaluate(loopTemp));
+                DoFocusedHarvesting(1d);
                 message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Harvesting");
               }
             }
             else
             {
-              DoFocusedHarvesting(1d);
-              message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_Harvesting");
+              message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources_NoPower");
+              Fields["ScoopUI"].guiActive = false;
+              Fields["IntakeSpeed"].guiActive = false;
+              Fields["ThermalUI"].guiActive = false;
             }
-
-
           }
           else
           {
@@ -433,9 +449,6 @@ namespace SpaceDust
         }
 
 
-
-        double orbitSpeedAtAlt = Math.Sqrt(part.vessel.mainBody.gravParameter / (part.vessel.altitude + part.vessel.mainBody.Radius));
-
         Vector3d worldVelocity = part.vessel.obt_velocity;
         Vector3 intakeVector;
         if (HarvestIntakeTransform == null)
@@ -460,11 +473,20 @@ namespace SpaceDust
 
           if (resourceSample * intakeVolume * resources[i].BaseEfficiency > resources[i].MinHarvestValue)
           {
-
+            //Utils.Log($"[SpaceDustHarvesterd] sampled {resources[i].Name} @ {resourceSample}, " +
+            //  $"minH {resources[i].MinHarvestValue}," +
+            //  $"effic {resources[i].BaseEfficiency}," +
+            //  $"volume {intakeVolume}," +
+            //  $"area {IntakeArea}," +
+            //  $"speedstatic {IntakeSpeedStatic}," +
+            //  $"worldvel {worldVelocity.magnitude}");
+          
             double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
             if (ScoopUI != "")
               ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
+
+            //Utils.Log($"[SpaceDustHarveste] sampled {resources[i].Name} @ {resourceSample}. Harvesting {resAmt * TimeWarp.fixedDeltaTime} at step {TimeWarp.fixedDeltaTime}");
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
 
