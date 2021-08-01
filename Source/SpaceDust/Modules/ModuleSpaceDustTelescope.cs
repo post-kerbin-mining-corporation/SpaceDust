@@ -51,7 +51,7 @@ namespace SpaceDust
 
     // Minimum EC to leave when harvesting
     [KSPField(isPersistant = false)]
-    public float minResToLeave = 1.0f;
+    public float minResToLeave = 0.1f;
 
     // Current scan target
     [KSPField(isPersistant = true)]

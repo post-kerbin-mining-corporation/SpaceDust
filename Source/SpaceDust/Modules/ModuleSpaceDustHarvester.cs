@@ -54,7 +54,7 @@ namespace SpaceDust
 
     // Minimum EC to leave when harvesting
     [KSPField(isPersistant = false)]
-    public float minResToLeave = 1.0f;
+    public float minResToLeave = 0.1f;
 
     // The velocity to use when the intake is static
     [KSPField(isPersistant = false)]
@@ -449,9 +449,6 @@ namespace SpaceDust
         }
 
 
-
-        double orbitSpeedAtAlt = Math.Sqrt(part.vessel.mainBody.gravParameter / (part.vessel.altitude + part.vessel.mainBody.Radius));
-
         Vector3d worldVelocity = part.vessel.obt_velocity;
         Vector3 intakeVector;
         if (HarvestIntakeTransform == null)
@@ -476,11 +473,20 @@ namespace SpaceDust
 
           if (resourceSample * intakeVolume * resources[i].BaseEfficiency > resources[i].MinHarvestValue)
           {
-
+            //Utils.Log($"[SpaceDustHarvesterd] sampled {resources[i].Name} @ {resourceSample}, " +
+            //  $"minH {resources[i].MinHarvestValue}," +
+            //  $"effic {resources[i].BaseEfficiency}," +
+            //  $"volume {intakeVolume}," +
+            //  $"area {IntakeArea}," +
+            //  $"speedstatic {IntakeSpeedStatic}," +
+            //  $"worldvel {worldVelocity.magnitude}");
+          
             double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
             if (ScoopUI != "")
               ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
+
+            //Utils.Log($"[SpaceDustHarveste] sampled {resources[i].Name} @ {resourceSample}. Harvesting {resAmt * TimeWarp.fixedDeltaTime} at step {TimeWarp.fixedDeltaTime}");
             part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
           }
 

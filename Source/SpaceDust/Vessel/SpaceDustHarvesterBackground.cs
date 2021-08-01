@@ -20,8 +20,44 @@ namespace SpaceDust
       moduleMiner = partModule;
       harvester = moduleMiner as ModuleSpaceDustHarvester;
 
+      foreach (HarvestedResource res in harvester.resources)
+      {
+        res.density = PartResourceLibrary.Instance.GetDefinition(res.Name).density;
+        }
     }
 
+    void AddBackgroundResources(ProtoVessel protoVessel, string resourceName, double amountToAdd)
+    {
+      // Iterate through all parts, adding the amount harvested
+      foreach (ProtoPartSnapshot p in ves.protoVessel.protoPartSnapshots)
+      {
+        foreach (ProtoPartResourceSnapshot r in p.resources)
+        {
+          if (r.resourceName == resourceName)
+          {
+            //Utils.Log($"Start {r.amount}/{r.maxAmount}");
+            double capacity = r.maxAmount - r.amount;
+
+            if (capacity >= amountToAdd)
+            {
+
+              r.amount = r.amount + amountToAdd;
+              // Utils.Log($"Added {amountToAdd} to protopart");
+              amountToAdd = 0d;
+            }
+            else
+            {
+              r.amount = r.maxAmount;
+              amountToAdd -= capacity;
+            }
+            // Utils.Log($"Start {r.amount}/{r.maxAmount}");
+          }
+          r.UpdateConfigNodeAmounts();
+        }
+
+      }
+
+    }
     public void Process(float timeStep)
     {
       // Utils.Log($"[SpaceDustHarvesterBackground]: tring to harvest {harvester.resources.Count} resources");
@@ -29,7 +65,7 @@ namespace SpaceDust
       //Utils.Log($"[SpaceDustHarvesterBackground]: type {harvester.HarvestType}, density {ves.mainBody.GetPressureAtm(ves.altitude)}, Vsrf {ves.srf_velocity}");
       if (bool.Parse(protoMiner.moduleValues.GetValue("Enabled")))
       {
-        if (harvester.HarvestType == HarvesterType.Atmosphere && ves.mainBody.GetPressureAtm(ves.altitude) > 0.0001d)
+        if (harvester.HarvestType == HarvesterType.Atmosphere && ves.mainBody.GetPressureAtm(ves.altitude) > 0.000d)
         {
 
           Vector3d worldVelocity = ves.srf_velocity;
@@ -50,35 +86,15 @@ namespace SpaceDust
 
             if (resourceSample > harvester.resources[i].MinHarvestValue)
             {
-              double resAmt = resourceSample * intakeVolume * harvester.resources[i].BaseEfficiency * timeStep;
-              foreach (ProtoPartSnapshot p in ves.protoVessel.protoPartSnapshots)
-              {
-                foreach (ProtoPartResourceSnapshot r in p.resources)
-                {
-                  if (r.amount < r.maxAmount + resAmt)
-                  {
-                    r.amount = r.amount + resAmt;
-                    resAmt = 0d;
-                  }
-                  else
-                  if (r.amount < r.maxAmount)
-                  {
-                    resAmt = resAmt - (r.maxAmount - r.amount);
-                    r.amount = r.maxAmount;
-                  }
-                }
-              }
+              double amountToAdd = resourceSample * intakeVolume * harvester.resources[i].BaseEfficiency * timeStep;
+              AddBackgroundResources(ves.protoVessel, harvester.resources[i].Name, amountToAdd);
             }
           }
         }
-        if (harvester.HarvestType == HarvesterType.Exosphere && ves.mainBody.GetPressureAtm(ves.altitude) < 0.0001d)
+        if (harvester.HarvestType == HarvesterType.Exosphere && ves.mainBody.GetPressureAtm(ves.altitude) == 0d)
         {
 
-          Vector3d worldVelocity = ves.obt_velocity;
-          double mach = ves.mach;
-
-
-         
+          Vector3d worldVelocity = ves.orbitDriver.vel;
           double dot = 1d;
           float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) + harvester.IntakeSpeedStatic) * harvester.IntakeArea;
 
@@ -89,27 +105,22 @@ namespace SpaceDust
               ves.altitude + ves.mainBody.Radius,
               ves.latitude,
               ves.longitude);
-
-            if (resourceSample > harvester.resources[i].MinHarvestValue)
+            
+            if (resourceSample >= harvester.resources[i].MinHarvestValue)
             {
-              double resAmt = resourceSample * intakeVolume * harvester.resources[i].BaseEfficiency * timeStep;
-              foreach (ProtoPartSnapshot p in ves.protoVessel.protoPartSnapshots)
-              {
-                foreach (ProtoPartResourceSnapshot r in p.resources)
-                {
-                  if (r.amount < r.maxAmount + resAmt)
-                  {
-                    r.amount = r.amount + resAmt;
-                    resAmt = 0d;
-                  }
-                  else
-                  if (r.amount < r.maxAmount)
-                  {
-                    resAmt = resAmt - (r.maxAmount - r.amount);
-                    r.amount = r.maxAmount;
-                  }
-                }
-              }
+              double amountToAdd = resourceSample * intakeVolume * 1d / harvester.resources[i].density * harvester.resources[i].BaseEfficiency * timeStep;
+
+              //Utils.Log($"[SpaceDustHarvesterBackground] sampled {harvester.resources[i].Name} @ {resourceSample}, " +
+              //$"minH {harvester.resources[i].MinHarvestValue}," +
+              //$"effic {harvester.resources[i].BaseEfficiency}," +
+              //$"volume {intakeVolume}," +
+              //$"area {harvester.IntakeArea}," +
+              //$"speedstatic {harvester.IntakeSpeedStatic}," +
+              //$"worldvel {worldVelocity.magnitude}");
+
+              
+              //Utils.Log($"[SpaceDustHarvesterBackground] sampled {harvester.resources[i].Name} @ {resourceSample}. Harvesting {amountToAdd} at step {timeStep}");
+              AddBackgroundResources(ves.protoVessel, harvester.resources[i].Name, amountToAdd);
             }
 
           }
