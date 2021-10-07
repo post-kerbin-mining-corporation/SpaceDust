@@ -96,17 +96,28 @@ namespace SpaceDust
     [KSPField(isPersistant = false)]
     public double FieldOfView = 1.8d;
 
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Event_EnableTelescope", active = true)]
+    [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Event_EnableTelescope", active = true)]
     public void EnableTelescope()
     {
       Enabled = true;
     }
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Event_DisableTelescope", active = false)]
+    [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Event_DisableTelescope", active = false)]
     public void DisableTelescope()
     {
       Enabled = false;
     }
+    // ACTIONS
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Action_Enable")]
+    public void EnableAction(KSPActionParam param) { EnableTelescope(); }
 
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Action_Disable")]
+    public void DisableAction(KSPActionParam param) { DisableTelescope(); }
+
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustTelescope_Action_Toggle")]
+    public void ToggleAction(KSPActionParam param)
+    {
+      if (Enabled) DisableTelescope(); else EnableTelescope();
+    }
 
     private AnimationState[] scanState;
     private List<InstrumentSlot> instrumentSlots;
@@ -213,7 +224,7 @@ namespace SpaceDust
     }
 
 
-    public override void OnUpdate()
+    public void Update()
     {
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
@@ -238,6 +249,7 @@ namespace SpaceDust
     }
     void FixedUpdate()
     {
+      HandleAnimation();
       if (HighLogic.LoadedSceneIsFlight)
       {
         if (Enabled)
@@ -335,14 +347,6 @@ namespace SpaceDust
             ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_NoPower");
 
           }
-          if (ScanAnimationName != "")
-          {
-            foreach (AnimationState anim in scanState)
-            {
-              anim.speed = 1f;
-              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
-            }
-          }
 
         }
         else
@@ -351,8 +355,27 @@ namespace SpaceDust
           CurrentPowerConsumption = 0f;
           ScannerUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustTelescope_Field_Status_Disabled");
           SetScanUI(false);
-          if (ScanAnimationName != "")
+
+        }
+      }
+    }
+    void HandleAnimation()
+    {
+      if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight)
+        if (ScanAnimationName != "")
+        {
+          if (Enabled)
           {
+
+            foreach (AnimationState anim in scanState)
+            {
+              anim.speed = 1f;
+              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
+            }
+          }
+          else
+          {
+
             foreach (AnimationState anim in scanState)
             {
               anim.speed = -1f;
@@ -360,8 +383,6 @@ namespace SpaceDust
             }
           }
         }
-      }
     }
   }
-
 }

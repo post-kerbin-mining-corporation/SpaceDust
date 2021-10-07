@@ -1,3 +1,9 @@
+v0.4.3
+------
+- Fixed smaller Sift-O-Tron not being able to harvest atmospheric LF
+- Added action groups to harvester, scanner, telescope modules
+- Made it possible to deploy harvester, scanner, telescope modules in the VAB
+
 v0.4.2
 ------
 - KSP 1.12
