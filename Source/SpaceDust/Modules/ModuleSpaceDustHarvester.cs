@@ -111,28 +111,42 @@ namespace SpaceDust
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Resources")]
     public string ScannerUI = "";
 
-    // UI field for showing scan status
+    // UI field for showing intake speed
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed")]
     public string IntakeSpeed = "";
 
-    // UI field for showing scan status
+    // UI field for showing sscoop status
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop")]
     public string ScoopUI = "";
 
-    // UI field for showing scan status
+    // UI field for showing thermal status
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Thermal")]
     public string ThermalUI = "";
 
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Event_EnableScanner", active = true)]
+    [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Event_EnableScanner", active = true)]
     public void EnableHarvester()
     {
       Enabled = true;
     }
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Event_DisableScanner", active = false)]
+    [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Event_DisableScanner", active = false)]
     public void DisableHarvester()
     {
       Enabled = false;
     }
+
+    // ACTIONS
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Action_Enable")]
+    public void EnableAction(KSPActionParam param) { EnableHarvester(); }
+
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Action_Disable")]
+    public void DisableAction(KSPActionParam param) { DisableHarvester(); }
+
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustHarvester_Action_Toggle")]
+    public void ToggleAction(KSPActionParam param)
+    {
+      if (Enabled) DisableHarvester(); else EnableHarvester();
+    }
+
 
     public List<HarvestedResource> resources;
     protected Transform HarvestIntakeTransform;
@@ -216,7 +230,7 @@ namespace SpaceDust
             Utils.LogError($"[ModuleSpaceDustHarvester] Couldn't find resource definition for {res.Name}");
           }
         }
-        
+
 
         if (Settings.SystemHeatActive)
         {
@@ -233,17 +247,17 @@ namespace SpaceDust
       {
         resources = new List<HarvestedResource>();
         foreach (ConfigNode resNode in node.GetNodes("HARVESTED_RESOURCE"))
-        { 
+        {
           HarvestedResource res = new HarvestedResource(resNode);
           if (res.Name == "" || String.IsNullOrEmpty(res.Name) || res.Name == "undefined")
             return;
 
-            resources.Add(res);
+          resources.Add(res);
         }
       }
     }
 
-    public override void OnUpdate()
+    public void Update()
     {
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
@@ -252,27 +266,12 @@ namespace SpaceDust
           Events["DisableHarvester"].active = Enabled;
           Events["EnableHarvester"].active = !Enabled;
         }
-        if (Enabled && LoopAnimationName != "")
-        {
-          foreach (AnimationState anim in loopState)
-          {
-            anim.wrapMode = WrapMode.Loop;
-            anim.speed = 1f;
-          }
-        }
-        else if (LoopAnimationName != "")
-        {
-          foreach (AnimationState anim in loopState)
-          {
-            anim.wrapMode = WrapMode.Loop;
-            anim.speed = 0f;
-          }
-        }
       }
     }
 
     void FixedUpdate()
     {
+      HandleAnimation();
       if (HighLogic.LoadedSceneIsFlight)
       {
         string message = "";
@@ -286,9 +285,9 @@ namespace SpaceDust
 
           Fields["ThermalUI"].guiActive = Settings.SystemHeatActive;
 
-          vessel.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out double currentEC,  out double maxEC);
+          vessel.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out double currentEC, out double maxEC);
           double chargeRequest = PowerCost * TimeWarp.fixedDeltaTime;
-          
+
           // check power
           if (currentEC > chargeRequest + minResToLeave)
           {
@@ -338,14 +337,7 @@ namespace SpaceDust
             Fields["IntakeSpeed"].guiActive = false;
             Fields["ThermalUI"].guiActive = false;
           }
-          if (HarvestAnimationName != "")
-          {
-            foreach (AnimationState anim in harvestState)
-            {
-              anim.speed = 1f;
-              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
-            }
-          }
+
 
         }
         else
@@ -358,14 +350,7 @@ namespace SpaceDust
           Fields["IntakeSpeed"].guiActive = false;
 
           Fields["ThermalUI"].guiActive = false;
-          if (HarvestAnimationName != "")
-          {
-            foreach (AnimationState anim in harvestState)
-            {
-              anim.speed = -1f;
-              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
-            }
-          }
+
         }
         ScannerUI = message;
       }
@@ -375,6 +360,51 @@ namespace SpaceDust
         if (Settings.SystemHeatActive && systemHeatModule != null)
         {
           AddFlux(SystemOutletTemperature, SystemPower, true);
+        }
+      }
+    }
+    void HandleAnimation()
+    {
+      if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight)
+      {
+        if (Enabled)
+        {
+          if (LoopAnimationName != "")
+          {
+
+            foreach (AnimationState anim in loopState)
+            {
+              anim.wrapMode = WrapMode.Loop;
+              anim.speed = 1f;
+            }
+          }
+          if (HarvestAnimationName != "")
+          {
+            foreach (AnimationState anim in harvestState)
+            {
+              anim.speed = 1f;
+              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
+            }
+          }
+        }
+        else
+        {
+          if (LoopAnimationName != "")
+          {
+            foreach (AnimationState anim in loopState)
+            {
+              anim.wrapMode = WrapMode.Loop;
+              anim.speed = 0f;
+            }
+          }
+          if (HarvestAnimationName != "")
+          {
+            foreach (AnimationState anim in harvestState)
+            {
+              anim.speed = -1f;
+              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
+            }
+          }
         }
       }
     }
@@ -436,7 +466,7 @@ namespace SpaceDust
         if (ScoopUI == "")
           ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
       }
-      
+
 
       if (HarvestType == HarvesterType.Exosphere && part.vessel.atmDensity == 0d)
       {
@@ -480,7 +510,7 @@ namespace SpaceDust
             //  $"area {IntakeArea}," +
             //  $"speedstatic {IntakeSpeedStatic}," +
             //  $"worldvel {worldVelocity.magnitude}");
-          
+
             double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
             if (ScoopUI != "")
               ScoopUI += "\n";

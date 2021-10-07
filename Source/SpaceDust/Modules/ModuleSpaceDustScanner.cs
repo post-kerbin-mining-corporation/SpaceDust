@@ -109,15 +109,29 @@ namespace SpaceDust
     [KSPField(isPersistant = false)]
     public string ScanAnimationName;
 
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Event_EnableScanner", active = true)]
+    [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Event_EnableScanner", active = true)]
     public void EnableScanner()
     {
       Enabled = true;
     }
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Event_DisableScanner", active = false)]
+    [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Event_DisableScanner", active = false)]
     public void DisableScanner()
     {
       Enabled = false;
+    }
+
+
+    // ACTIONS
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Action_Enable")]
+    public void EnableAction(KSPActionParam param) { EnableScanner(); }
+
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Action_Disable")]
+    public void DisableAction(KSPActionParam param) { DisableScanner(); }
+
+    [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Action_Toggle")]
+    public void ToggleAction(KSPActionParam param)
+    {
+      if (Enabled) DisableScanner(); else EnableScanner();
     }
 
 
@@ -196,7 +210,7 @@ namespace SpaceDust
       }
     }
 
-    public override void OnUpdate()
+    public void Update()
     {
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
@@ -222,6 +236,7 @@ namespace SpaceDust
     }
     void FixedUpdate()
     {
+      HandleAnimation();
       if (HighLogic.LoadedSceneIsFlight)
       {
         string message = "";
@@ -340,28 +355,14 @@ namespace SpaceDust
             }
           }
 
-          if (ScanAnimationName != "")
-          {
-            foreach (AnimationState anim in scanState)
-            {
-              anim.speed = 1f;
-              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
-            }
-          }
+
         }
         else
         {
           CurrentPowerConsumption = 0f;
 
           message = Localizer.Format(("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Disabled"));
-          if (ScanAnimationName != "")
-          {
-            foreach (AnimationState anim in scanState)
-            {
-              anim.speed = -1f;
-              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
-            }
-          }
+
         }
         ScannerUI = message;
       }
@@ -369,6 +370,32 @@ namespace SpaceDust
       {
         CurrentPowerConsumption = -PowerCost;
       }
+    }
+
+    void HandleAnimation()
+    {
+      if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight)
+        if (ScanAnimationName != "")
+        {
+          if (Enabled)
+          {
+
+            foreach (AnimationState anim in scanState)
+            {
+              anim.speed = 1f;
+              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
+            }
+          }
+          else
+          {
+
+            foreach (AnimationState anim in scanState)
+            {
+              anim.speed = -1f;
+              anim.normalizedTime = Mathf.Clamp(anim.normalizedTime, 0f, 1f);
+            }
+          }
+        }
     }
   }
 }
