@@ -1,3 +1,7 @@
+v0.4.4
+------
+- Fixed a bug on loading when patching a space dust scanner (thanks Angel-125)
+
 v0.4.3
 ------
 - Fixed smaller Sift-O-Tron not being able to harvest atmospheric LF
