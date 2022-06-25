@@ -219,24 +219,25 @@ namespace SpaceDust
           if (node != null)
             OnLoad(node);
         }
-        foreach (HarvestedResource res in resources)
+        if (resources != null)
         {
-          try
+          foreach (HarvestedResource res in resources)
           {
-            res.density = PartResourceLibrary.Instance.GetDefinition(res.Name).density;
-          }
-          catch (NullReferenceException)
-          {
-            Utils.LogError($"[ModuleSpaceDustHarvester] Couldn't find resource definition for {res.Name}");
+            try
+            {
+              res.density = PartResourceLibrary.Instance.GetDefinition(res.Name).density;
+            }
+            catch (NullReferenceException)
+            {
+              Utils.LogError($"[ModuleSpaceDustHarvester] Couldn't find resource definition for {res.Name}");
+            }
           }
         }
-
 
         if (Settings.SystemHeatActive)
         {
           systemHeatModule = this.GetComponents<PartModule>().ToList().Find(x => x.moduleName == "ModuleSystemHeat" && x.Fields.GetValue("moduleID").ToString() == HeatModuleID);
         }
-
       }
     }
 

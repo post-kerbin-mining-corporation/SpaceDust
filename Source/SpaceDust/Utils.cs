@@ -41,17 +41,17 @@ namespace SpaceDust
     {
       try
       {
-        return GameDatabase.Instance.GetConfigs("PART").
-                Single(c => part.partInfo.name.Replace('_', '.') == c.name.Replace('_', '.')).config.
-                GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+        if (part == null || part.partInfo == null || part.partInfo.partConfig == null)
+          return null;
+        return part.partInfo.partConfig.GetNodes("MODULE").First(n => n.GetValue("name") == moduleName);
       }
       catch (Exception)
       {
         Utils.LogError($"Couldn't get module config for {moduleName} on {part.partInfo.name}");
         return null;
       }
-
     }
+
     public static string ToSI(double d, string format = null)
     {
       if (d == 0.0)
