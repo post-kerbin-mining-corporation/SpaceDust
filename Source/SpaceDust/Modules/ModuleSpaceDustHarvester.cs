@@ -456,7 +456,7 @@ namespace SpaceDust
 
           if (resourceSample > resources[i].MinHarvestValue)
           {
-            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
+            double resAmt = resourceSample * intakeVolume * 1d * resources[i].BaseEfficiency * scale;
             if (ScoopUI != "")
               ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
@@ -512,7 +512,7 @@ namespace SpaceDust
             //  $"speedstatic {IntakeSpeedStatic}," +
             //  $"worldvel {worldVelocity.magnitude}");
 
-            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
+            double resAmt = resourceSample * intakeVolume * 1d * resources[i].BaseEfficiency * scale;
             if (ScoopUI != "")
               ScoopUI += "\n";
             ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));

@@ -267,7 +267,7 @@ namespace SpaceDust
                     part.vessel.mainBody,
                     vessel.altitude + part.vessel.mainBody.Radius,
                     vessel.latitude,
-                    vessel.longitude) * 1d / resources[i].density;
+                    vessel.longitude) * 1d;
                   //Utils.Log($"{resources[i].Name} at {part.vessel.mainBody}, alt: {vessel.altitude} lat: {vessel.latitude}, lon: {vessel.longitude}, sample: {resourceSample}");
                   // This mod discovers all bands at the body
                   if (resources[i].DiscoverMode == DiscoverMode.SOI)
