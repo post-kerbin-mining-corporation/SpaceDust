@@ -1,3 +1,7 @@
+v0.5.0
+------
+- 
+
 v0.4.4
 ------
 - Fixed a bug on loading when patching a space dust scanner (thanks Angel-125)

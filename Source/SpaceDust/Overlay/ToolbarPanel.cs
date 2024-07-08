@@ -81,7 +81,7 @@ namespace SpaceDust
       if (Settings.DebugUI)
         Utils.Log($"[ToolbarPanel]: Adding a new resource element for {resourceName}");
       noneText.gameObject.SetActive(false);
-      GameObject newElement = (GameObject)Instantiate(UILoader.ToolbarWidgetPrefab, Vector3.zero, Quaternion.identity);
+      GameObject newElement = (GameObject)Instantiate(Assets.ToolbarWidgetPrefab, Vector3.zero, Quaternion.identity);
       
       newElement.transform.SetParent(resourceList);
       //newUIPanel.transform.localPosition = Vector3.zero;

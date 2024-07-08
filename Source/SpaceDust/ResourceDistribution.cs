@@ -1,57 +1,59 @@
-/// Defines the classes t
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 
 namespace SpaceDust
 {
-  
-
-  // Represents the full set of resources around a body
+  /// <summary>
+  /// Represents the full set of bands for a single resource around a single body
+  /// </summary>
   public class ResourceDistribution
   {
     public string ResourceName;
     public string Body;
+    public List<ResourceBand> Bands { get; private set; }
 
-    
-    public List<ResourceBand> Bands { get { return resourceBands; } }
 
-    List<ResourceBand> resourceBands;
+    private const string RESOURCENAME_PARAMETER_NAME = "resourceName";
+    private const string BODY_PARAMETER_NAME = "body";
+    private const string BAND_NODE_NAME = "RESOURCEBAND";
 
     public ResourceDistribution(ConfigNode node)
     {
 
-      node.TryGetValue("resourceName", ref ResourceName);
-      node.TryGetValue("body", ref Body);
+      node.TryGetValue(RESOURCENAME_PARAMETER_NAME, ref ResourceName);
+      node.TryGetValue(BODY_PARAMETER_NAME, ref Body);
 
 
-      resourceBands = new List<ResourceBand>();
-      ConfigNode[] nodes = node.GetNodes("RESOURCEBAND");
+      Bands = new List<ResourceBand>();
+      ConfigNode[] nodes = node.GetNodes(BAND_NODE_NAME);
       for (int i=0; i < nodes.Length; i++)
       {
-        resourceBands.Add(new ResourceBand(ResourceName, nodes[i]));
+        Bands.Add(new ResourceBand(ResourceName, nodes[i]));
       }
       Initialize();
     }
 
     public void Initialize()
     {
-      for (int i=0; i < resourceBands.Count; i++)
+      for (int i=0; i < Bands.Count; i++)
       {
-        resourceBands[i].Initialize(Body);
+        Bands[i].Initialize(Body);
       }
-      
     }
 
+    /// <summary>
+    /// Sample all the bands at this coordinate
+    /// </summary>
+    /// <param name="altitude"></param>
+    /// <param name="latitude"></param>
+    /// <param name="longitude"></param>
+    /// <returns></returns>
     public double Sample(double altitude, double latitude, double longitude)
     {
       double sampleResult = 0d;
-      for (int i = 0; i< resourceBands.Count ;i++)
+      for (int i = 0; i< Bands.Count ;i++)
       {
         
-        sampleResult += resourceBands[i].Sample(altitude, latitude, longitude);
+        sampleResult += Bands[i].Sample(altitude, latitude, longitude);
       }
       return sampleResult;
     }

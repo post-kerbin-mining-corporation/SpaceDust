@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using KSP.Localization;
 
 namespace SpaceDust
 {
+  /// <summary>
   /// Represents a continuous band of a single resource
+  /// </summary>
   public class ResourceBand
   {
 
@@ -25,14 +24,13 @@ namespace SpaceDust
     public float discoveryScienceReward = 1f;
     public float identifyScienceReward = 1f;
 
-    float countScale = 1f;
-    float rotateRate = 1f;
-    double minAbundance = 0d;
-    double maxAbundance = 0d;
-    bool useAirDensity = false;
-
-    FloatCurve densityCurve;
-    CelestialBody associatedBody;
+    private float countScale = 1f;
+    private float rotateRate = 1f;
+    private double minAbundance = 0d;
+    private double maxAbundance = 0d;
+    private bool useAirDensity = false;
+    private FloatCurve densityCurve;
+    private CelestialBody associatedBody;
 
     public DistributionModel Distribution { get; private set; }
 

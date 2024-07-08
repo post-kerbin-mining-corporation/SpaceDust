@@ -128,7 +128,7 @@ namespace SpaceDust
 
     protected void CreateToolbarPanel()
     {
-      GameObject newUIPanel = (GameObject)Instantiate(UILoader.ToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
+      GameObject newUIPanel = (GameObject)Instantiate(Assets.ToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
       newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
       newUIPanel.transform.localPosition = Vector3.zero;
       toolbarPanel = newUIPanel.AddComponent<ToolbarPanel>();

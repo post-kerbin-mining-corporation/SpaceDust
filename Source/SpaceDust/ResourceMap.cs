@@ -6,40 +6,9 @@ using UnityEngine;
 
 namespace SpaceDust
 {
-  [KSPAddon(KSPAddon.Startup.EveryScene, false)]
-  public class SpaceDust : MonoBehaviour
-  {
-    public static SpaceDust Instance { get; private set; }
-
-    protected void Awake()
-    {
-      Instance = this;
-    }
-    protected void Start()
-    {
-      Settings.Load();
-      if (HighLogic.LoadedSceneIsGame)
-      {
-        try
-        {
-          SpaceDustInstruments.Instance.Load();
-        }
-        catch (TypeLoadException except)
-        {
-          Utils.LogError($"[SpaceDust] Critical error loading SpaceDustInstrument from confignode {except.Message}");
-        }
-        try
-        {
-          SpaceDustResourceMap.Instance.Load();
-        }
-        catch (TypeLoadException except)
-        {
-          Utils.LogError($"[SpaceDust] Critical error loading SpaceDustResource from configNode {except.Message}");
-        }
-      }
-    }
-  }
-
+  /// <summary>
+  /// This holds the data about all resources in the game
+  /// </summary>
   [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
   public class SpaceDustResourceMap : MonoBehaviour
   {
@@ -53,7 +22,7 @@ namespace SpaceDust
     }
     public void Load()
     {
-      ConfigNode[] resourceDistributionNodes = GameDatabase.Instance.GetConfigNodes("SPACEDUST_RESOURCE");
+      ConfigNode[] resourceDistributionNodes = GameDatabase.Instance.GetConfigNodes(Settings.RESOURCE_DATA_NODE_NAME);
       Resources = new Dictionary<string, List<ResourceDistribution>>();
       List<ResourceDistribution> distros = new List<ResourceDistribution>();
       foreach (ConfigNode node in resourceDistributionNodes)
@@ -96,7 +65,6 @@ namespace SpaceDust
           if (Resources[body.name][i].ResourceName == ResourceName)
           {
             sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude) / PartResourceLibrary.Instance.GetDefinition(ResourceName).density;
-            //Utils.Log($"Sampled {ResourceName} of  {sampledTotal}");
           }
         }
       }
@@ -124,6 +92,12 @@ namespace SpaceDust
       return getResources;
     }
 
+    /// <summary>
+    /// Get all the Resource Bands at a given celestial body
+    /// </summary>
+    /// <param name="body"></param>
+    /// <param name="resourceName"></param>
+    /// <returns></returns>
     public List<ResourceBand> GetBodyDistributions(CelestialBody body, string resourceName)
     {
       List<ResourceBand> dist = new List<ResourceBand>();

@@ -82,6 +82,9 @@
     <Compile Include="Modules\ModuleSpaceDustHarvester.cs" />
     <Compile Include="Modules\ModuleSpaceDustScanner.cs" />
     <Compile Include="Modules\ModuleSpaceDustTelescope.cs" />
+    <Compile Include="SpaceDust.cs" />
+    <Compile Include="SpaceDustDiscoveryData.cs" />
+    <Compile Include="SpaceDustInstrument.cs" />
     <Compile Include="SpaceDustInstruments.cs" />
     <Compile Include="Vessel\SpaceDustHarvesterBackground.cs" />
     <Compile Include="Vessel\SpaceDustTelescopeBackground.cs" />

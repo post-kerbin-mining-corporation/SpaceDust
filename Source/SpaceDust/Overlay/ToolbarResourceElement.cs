@@ -87,7 +87,7 @@ namespace SpaceDust
 
       foreach( ResourceBand b in bands)
       {
-        GameObject newElement = (GameObject)Instantiate(UILoader.BandResourceWidgetPrefab, Vector3.zero, Quaternion.identity);
+        GameObject newElement = (GameObject)Instantiate(Assets.BandResourceWidgetPrefab, Vector3.zero, Quaternion.identity);
 
         newElement.transform.SetParent(rect);
         //newUIPanel.transform.localPosition = Vector3.zero;
