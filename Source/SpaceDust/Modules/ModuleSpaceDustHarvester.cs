@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SpaceDust
 {
-  public enum HarvesterType
+  public enum HarvestType
   {
     Atmosphere,
     Exosphere,
@@ -70,7 +70,7 @@ namespace SpaceDust
     public FloatCurve IntakeVelocityScale;
 
     [KSPField(isPersistant = false)]
-    public HarvesterType HarvestType;
+    public HarvestType HarvestType;
 
     [KSPField(isPersistant = false)]
     public String HarvestIntakeTransformName;
@@ -412,7 +412,7 @@ namespace SpaceDust
     void DoFocusedHarvesting(double scale)
     {
 
-      if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0d)
+      if (HarvestType == HarvestType.Atmosphere && part.vessel.atmDensity > 0d)
       {
         if (part.vessel.atmDensity <= 0d)
         {
@@ -469,7 +469,7 @@ namespace SpaceDust
       }
 
 
-      if (HarvestType == HarvesterType.Exosphere && part.vessel.atmDensity == 0d)
+      if (HarvestType == HarvestType.Exosphere && part.vessel.atmDensity == 0d)
       {
         if (part.vessel.atmDensity > 0d)
         {

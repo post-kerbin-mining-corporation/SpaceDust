@@ -9,7 +9,7 @@ using KSP.Localization;
 
 namespace SpaceDust
 {
-  public class ToolbarResourceElement: MonoBehaviour
+  public class ToolbarResourceElement : MonoBehaviour
   {
     public bool active = false;
     public RectTransform rect;
@@ -18,11 +18,13 @@ namespace SpaceDust
     public Text resourceName;
 
     public List<BandResourceElement> bandWidgets;
-    string resName = "";
+
+    private string resName = "";
+    private const string RESOURCE_UNKNOWN_KEY = "#LOC_SpaceDust_UI_UnknownResource";
 
     void Awake()
     {
-      FindElements(); 
+      FindElements();
     }
 
     void FindElements()
@@ -32,41 +34,48 @@ namespace SpaceDust
       resourceColor = transform.FindDeepChild("Swatch").GetComponent<Image>();
       resourceName = transform.FindDeepChild("Label").GetComponent<Text>();
 
-
       visibleToggle = transform.GetComponent<Toggle>();
       visibleToggle.onValueChanged.AddListener(delegate { ToggleResource(); });
 
       bandWidgets = new List<BandResourceElement>();
-     // Utils.Log($"Finding {resourceColor} {resourceName} {visibleToggle}");
     }
 
-    public void Start()
-    {
-    }
-
+    /// <summary>
+    /// Toggles overlay visibility for this resource
+    /// </summary>
     public void ToggleResource()
     {
       MapOverlay.Instance.SetResourceVisible(resName, visibleToggle.isOn);
       ToolbarUI.Instance.SetResourceVisible(resName, visibleToggle.isOn);
 
-      foreach (BandResourceElement wdget in bandWidgets)
+      foreach (BandResourceElement bandElement in bandWidgets)
       {
-        if (SpaceDustScenario.Instance.IsIdentified(resName, wdget.associatedBand.name, wdget.associatedBody))
-          wdget.SetVisible(visibleToggle.isOn);
+        if (SpaceDustScenario.Instance.IsDiscovered(resName, bandElement.associatedBand.name, bandElement.associatedBody))
+        {
+          bandElement.SetVisible(true);
+        }
         else
-          wdget.SetVisible(false);
+        {
+          bandElement.SetVisible(false);
+        }
       }
     }
 
-    public void SetResource(CelestialBody body, string ResourceName, List<ResourceBand> bands, bool shown)
+    /// <summary>
+    /// Assigns a resource for this UI widget
+    /// </summary>
+    /// <param name="body"></param>
+    /// <param name="ResourceName"></param>
+    /// <param name="bands"></param>
+    /// <param name="shown"></param>
+    public void AssignResource(CelestialBody body, string ResourceName, List<ResourceBand> bands, bool shown)
     {
       if (resourceColor == null) FindElements();
 
       resName = ResourceName;
       bool anyID = SpaceDustScenario.Instance.IsAnyIdentified(ResourceName, body);
-      bool anyDiscover = SpaceDustScenario.Instance.IsAnyDiscovered(ResourceName, body);      
+      bool anyDiscover = SpaceDustScenario.Instance.IsAnyDiscovered(ResourceName, body);
       resourceColor.enabled = anyID;
-
 
       if (anyID)
       {
@@ -77,7 +86,7 @@ namespace SpaceDust
       else if (anyDiscover)
       {
         resourceColor.color = Settings.resourceDiscoveredColor;
-        resourceName.text = Localizer.Format("#LOC_SpaceDust_UI_UnknownResource");
+        resourceName.text = Localizer.Format(RESOURCE_UNKNOWN_KEY);
         SetVisible(true);
       }
       else
@@ -85,26 +94,34 @@ namespace SpaceDust
         SetVisible(false);
       }
 
-      foreach( ResourceBand b in bands)
+      foreach (ResourceBand band in bands)
       {
-        GameObject newElement = (GameObject)Instantiate(Assets.BandResourceWidgetPrefab, Vector3.zero, Quaternion.identity);
+        GameObject bandElement = (GameObject)Instantiate(SpaceDustAssets.BandResourceWidgetPrefab, Vector3.zero, Quaternion.identity);
+        bandElement.transform.SetParent(rect);
 
-        newElement.transform.SetParent(rect);
-        //newUIPanel.transform.localPosition = Vector3.zero;
-        BandResourceElement res = newElement.AddComponent<BandResourceElement>();
-        res.SetBand(body, b);
-        bandWidgets.Add(res);
+        BandResourceElement bandResElement = bandElement.AddComponent<BandResourceElement>();
+        bandResElement.AssignBand(body, band);
+        bandWidgets.Add(bandResElement);
 
-        if (anyID && shown)
-          res.SetVisible(true);
+        /// bands are visible in the UI if they have been discovered
+        if (SpaceDustScenario.Instance.IsDiscovered(ResourceName, band.name, body))
+        {
+          bandResElement.SetVisible(true);
+        }
         else
-          res.SetVisible(false);
+        {
+          bandResElement.SetVisible(false);
+        }
       }
-
       visibleToggle.isOn = shown;
       MapOverlay.Instance.SetResourceVisible(resName, visibleToggle.isOn);
       ToolbarUI.Instance.SetResourceVisible(resName, visibleToggle.isOn);
     }
+
+    /// <summary>
+    /// Sets if this resource is visible in the UI
+    /// </summary>
+    /// <param name="state"></param>
     public void SetVisible(bool state)
     {
       active = state;

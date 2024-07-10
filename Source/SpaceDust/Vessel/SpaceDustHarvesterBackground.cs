@@ -65,7 +65,7 @@ namespace SpaceDust
       //Utils.Log($"[SpaceDustHarvesterBackground]: type {harvester.HarvestType}, density {ves.mainBody.GetPressureAtm(ves.altitude)}, Vsrf {ves.srf_velocity}");
       if (bool.Parse(protoMiner.moduleValues.GetValue("Enabled")))
       {
-        if (harvester.HarvestType == HarvesterType.Atmosphere && ves.mainBody.GetPressureAtm(ves.altitude) > 0.000d)
+        if (harvester.HarvestType == HarvestType.Atmosphere && ves.mainBody.GetPressureAtm(ves.altitude) > 0.000d)
         {
 
           Vector3d worldVelocity = ves.srf_velocity;
@@ -91,7 +91,7 @@ namespace SpaceDust
             }
           }
         }
-        if (harvester.HarvestType == HarvesterType.Exosphere && ves.mainBody.GetPressureAtm(ves.altitude) == 0d)
+        if (harvester.HarvestType == HarvestType.Exosphere && ves.mainBody.GetPressureAtm(ves.altitude) == 0d)
         {
 
           Vector3d worldVelocity = ves.orbitDriver.vel;

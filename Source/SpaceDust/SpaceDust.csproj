@@ -48,9 +48,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\..\Games\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.AnimationModule">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
@@ -62,6 +59,14 @@
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.InputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -82,6 +87,10 @@
     <Compile Include="Modules\ModuleSpaceDustHarvester.cs" />
     <Compile Include="Modules\ModuleSpaceDustScanner.cs" />
     <Compile Include="Modules\ModuleSpaceDustTelescope.cs" />
+    <Compile Include="Modules\ScannedResource.cs" />
+    <Compile Include="Overlay\DistributionMesh.cs" />
+    <Compile Include="Overlay\FieldCollision.cs" />
+    <Compile Include="Overlay\MapOverlayInspectorPanel.cs" />
     <Compile Include="SpaceDust.cs" />
     <Compile Include="SpaceDustDiscoveryData.cs" />
     <Compile Include="SpaceDustInstrument.cs" />
@@ -89,13 +98,13 @@
     <Compile Include="Vessel\SpaceDustHarvesterBackground.cs" />
     <Compile Include="Vessel\SpaceDustTelescopeBackground.cs" />
     <Compile Include="Vessel\SpaceDustVessel.cs" />
-    <Compile Include="Overlay\BandResourceElement.cs" />
+    <Compile Include="UI\BandResourceElement.cs" />
     <Compile Include="Overlay\MapOverlay.cs" />
     <Compile Include="Overlay\ParticleField.cs" />
-    <Compile Include="Overlay\ToolbarPanel.cs" />
-    <Compile Include="Overlay\ToolbarResourceElement.cs" />
-    <Compile Include="Overlay\ToolbarUI.cs" />
-    <Compile Include="Overlay\UILoader.cs" />
+    <Compile Include="UI\ToolbarPanel.cs" />
+    <Compile Include="UI\ToolbarResourceElement.cs" />
+    <Compile Include="UI\ToolbarUI.cs" />
+    <Compile Include="UI\SpaceDustAssets.cs" />
     <Compile Include="ResourceBand.cs" />
     <Compile Include="ResourceDistribution.cs" />
     <Compile Include="ResourceMap.cs" />

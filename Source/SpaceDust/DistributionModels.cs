@@ -1,4 +1,6 @@
 using System;
+using UnityEngine;
+
 namespace SpaceDust
 {
   public enum FalloffType
@@ -42,7 +44,7 @@ namespace SpaceDust
     }
 
     /// <summary>
-    /// ToSTring
+    /// ToString
     /// </summary>
     /// <returns></returns>
     public override string ToString()

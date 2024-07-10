@@ -20,6 +20,27 @@ namespace SpaceDust
     {
       Debug.LogWarning("[SpaceDust]" + str);
     }
+
+    /// <summary>
+    /// Get a reference in a child of a type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="name"></param>
+    /// <param name="parent"></param>
+    /// <returns></returns>
+    public static T FindChildOfType<T>(string name, Transform parent)
+    {
+      T result = default(T);
+      try
+      {
+        result = parent.FindDeepChild(name).GetComponent<T>();
+      }
+      catch (NullReferenceException e)
+      {
+        Debug.LogError($"Couldn't find {name} in children of {parent.name}");
+      }
+      return result;
+    }
     // This function loads up some animationstates
     public static AnimationState[] SetUpAnimation(string animationName, Part part)
     {
@@ -75,6 +96,27 @@ namespace SpaceDust
       }
 
       return scaled.ToString(format) + " " + prefix;
+    }
+
+    /// <summary>
+    /// Transform cartesian to spherical coordinates
+    /// </summary>
+    /// <param name="cart"></param>
+    /// <returns></returns>
+    public static Vector3 Cart2Sphere(Vector3 cart)
+    {
+      float r = Mathf.Sqrt(cart.x * cart.x + cart.y * cart.y + cart.z * cart.z);
+      float phi = Mathf.Atan2(cart.y, cart.x);
+      float theta = Mathf.Acos(cart.z / r);
+
+      return new Vector3(r, phi, theta);
+    }
+    public static Vector3 Pol2Cart(Vector3 pol)
+    {
+      float x = pol.x * Mathf.Cos(pol.y) * Mathf.Cos(pol.z);
+      float y = pol.x * Mathf.Cos(pol.y) * Mathf.Sin(pol.z);
+      float z = pol.x * Mathf.Sin(pol.y);
+      return new Vector3(x, y, z);
     }
 
     public static bool CalculateBodyLOS(Vessel ves, CelestialBody target, Transform refXForm, out float angle, out CelestialBody obscuringBody)

@@ -1,6 +1,13 @@
 v0.5.0
 ------
-- 
+- Improved the Overlay
+-- When a Resource is toggled on, mousing over a distribution in the map view will show a tooltip that describes the resource
+-- Resources that are identified will show a max concentration, unidentified will show unknown
+- Improved the Toolbar panel
+-- Discovered bands are now always shown even if the overlay for that Resource is not enabled
+-- Icon for bands that show if they're Exoatmospheric or Atmospheric
+-- Behaves better with UI scaling
+- Fixed a null reference that broke the UI when focused on something that wasn't a CB or a vessel (e.g a maneuver node)
 
 v0.4.4
 ------

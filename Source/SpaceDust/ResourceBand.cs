@@ -13,13 +13,13 @@ namespace SpaceDust
     public string title = "GenericBand";
     public string ResourceName { get; private set; }
     public double Abundance { get; private set; }
-
     public float ParticleCountScale { get; private set; }
     public float ParticleRotateRate { get; private set; }
 
     public bool AlwaysDiscovered = false;
     public bool AlwaysIdentified = false;
     public float RemoteDiscoveryScale = 1f;
+    public HarvestType BandType;
 
     public float discoveryScienceReward = 1f;
     public float identifyScienceReward = 1f;
@@ -42,6 +42,7 @@ namespace SpaceDust
 
       node.TryGetValue("name", ref name);
       node.TryGetValue("title", ref title);
+      node.TryGetEnum<HarvestType>("bandType", ref BandType, HarvestType.Atmosphere);
       node.TryGetValue("countScale", ref countScale);
       node.TryGetValue("rotateRate", ref rotateRate);
 

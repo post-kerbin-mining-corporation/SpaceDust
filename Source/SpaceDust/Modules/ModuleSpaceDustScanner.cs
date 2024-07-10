@@ -6,105 +6,36 @@ using KSP.Localization;
 
 namespace SpaceDust
 {
-  public enum DiscoverMode
-  {
-    None,
-    Local,
-    SOI,
-    Altitude
-  }
 
-  public class ScannedResource
-  {
-    public string Name = "";
-    public DiscoverMode DiscoverMode;
-    public DiscoverMode IdentifyMode;
-    public double LocalThreshold = 0.01;
-    public double DiscoverRange = 70000;
-    public double IdentifyRange = 30000;
-    public double density = 0.05;
-
-    public ScannedResource(ConfigNode c)
-    {
-      Load(c);
-    }
-    public void Load(ConfigNode c)
-    {
-      c.TryGetValue("name", ref Name);
-      c.TryGetEnum<DiscoverMode>("DiscoverMode", ref DiscoverMode, DiscoverMode.Local);
-      c.TryGetEnum<DiscoverMode>("IdentifyMode", ref IdentifyMode, DiscoverMode.Local);
-      c.TryGetValue("LocalThreshold", ref LocalThreshold);
-      c.TryGetValue("DiscoverRange", ref DiscoverRange);
-      c.TryGetValue("IdentifyRange", ref IdentifyRange);
-
-
-    }
-    public string GenerateInfoString()
-    {
-      string msg = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Resource", Name);
-      msg += " ";
-      switch (DiscoverMode)
-      {
-        case DiscoverMode.Local:
-          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Discovers_Local");
-          break;
-        case DiscoverMode.SOI:
-          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Discovers_SOI");
-          break;
-        case DiscoverMode.Altitude:
-          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Discovers_Altitude", (DiscoverRange / 1000.0).ToString("F0"));
-          break;
-      }
-      msg += " ";
-      switch (IdentifyMode)
-      {
-        case DiscoverMode.Local:
-          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Identifies_Local");
-          break;
-        case DiscoverMode.SOI:
-          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Identifies_SOI");
-          break;
-        case DiscoverMode.Altitude:
-          msg += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Info_Identifies_Altitude", (IdentifyRange / 1000.0).ToString("F0"));
-          break;
-      }
-
-
-
-      return msg;
-    }
-  }
   public class ModuleSpaceDustScanner : PartModule
   {
-    // Am i enabled?
+    /// Am i enabled?
     [KSPField(isPersistant = true)]
     public bool Enabled = false;
 
-    // Cost per second to run the scanner
+    /// Cost per second to run the scanner
     [KSPField(isPersistant = true)]
     public float PowerCost = 1f;
 
-    // Minimum EC to leave when harvesting
+    /// Minimum EC to leave when harvesting
     [KSPField(isPersistant = false)]
     public float minResToLeave = 0.1f;
 
-    // Am i enabled?
+    /// Am i enabled?
     [KSPField(isPersistant = false)]
     public bool ScanInSpace = true;
 
-    // Am i enabled?
+    /// Am i enabled?
     [KSPField(isPersistant = false)]
     public bool ScanInAtmosphere = true;
 
-    // Current cost to run the scanner
+    /// Current cost to run the scanner
     [KSPField(isPersistant = true)]
     public float CurrentPowerConsumption = 1f;
 
-    // UI field for showing scan status
+    /// UI field for showing scan status
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Resources")]
     public string ScannerUI = "";
-
-
 
     [KSPField(isPersistant = false)]
     public string ScanAnimationName;
@@ -120,8 +51,7 @@ namespace SpaceDust
       Enabled = false;
     }
 
-
-    // ACTIONS
+    /// ACTIONS
     [KSPAction(guiName = "#LOC_SpaceDust_ModuleSpaceDustScanner_Action_Enable")]
     public void EnableAction(KSPActionParam param) { EnableScanner(); }
 
@@ -134,11 +64,8 @@ namespace SpaceDust
       if (Enabled) DisableScanner(); else EnableScanner();
     }
 
-
     private AnimationState[] scanState;
     private List<ScannedResource> resources;
-
-
 
     public override string GetModuleDisplayName()
     {
@@ -193,7 +120,6 @@ namespace SpaceDust
         {
           res.density = PartResourceLibrary.Instance.GetDefinition(res.Name).density;
         }
-
       }
     }
 
@@ -234,6 +160,7 @@ namespace SpaceDust
         return ScanInSpace;
       }
     }
+
     void FixedUpdate()
     {
       HandleAnimation();
@@ -267,9 +194,9 @@ namespace SpaceDust
                     part.vessel.mainBody,
                     vessel.altitude + part.vessel.mainBody.Radius,
                     vessel.latitude,
-                    vessel.longitude) * 1d / resources[i].density;
-                  //Utils.Log($"{resources[i].Name} at {part.vessel.mainBody}, alt: {vessel.altitude} lat: {vessel.latitude}, lon: {vessel.longitude}, sample: {resourceSample}");
-                  // This mod discovers all bands at the body
+                    vessel.longitude);
+
+                  // This mode discovers all bands at the body
                   if (resources[i].DiscoverMode == DiscoverMode.SOI)
                   {
                     SpaceDustScenario.Instance.DiscoverResourceBandsAtBody(resources[i].Name, vessel.mainBody);
@@ -288,7 +215,7 @@ namespace SpaceDust
                       }
                     }
                   }
-                  // This mod discovers all bands at the body
+                  // This mode discovers all bands at the body
                   if (resources[i].DiscoverMode == DiscoverMode.Local)
                   {
                     List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
@@ -302,7 +229,7 @@ namespace SpaceDust
                       }
                     }
                   }
-                  // This mod discovers all bands at the body
+                  // This mode discovers all bands at the body
                   if (resources[i].IdentifyMode == DiscoverMode.SOI)
                   {
 
@@ -323,7 +250,7 @@ namespace SpaceDust
                       }
                     }
                   }
-                  // This mod discovers all bands at the body
+                  // This mode discovers all bands at the body
                   if (resources[i].IdentifyMode == DiscoverMode.Local)
                   {
                     List<ResourceBand> bands = SpaceDustResourceMap.Instance.GetBodyDistributions(vessel.mainBody, resources[i].Name);
@@ -360,9 +287,7 @@ namespace SpaceDust
         else
         {
           CurrentPowerConsumption = 0f;
-
           message = Localizer.Format(("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Disabled"));
-
         }
         ScannerUI = message;
       }
