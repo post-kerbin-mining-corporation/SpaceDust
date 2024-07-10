@@ -26,6 +26,12 @@ namespace SpaceDust
     public double IdentifyRange = 30000;
     public double density = 0.05;
 
+    private const string DISCOVER_MODE_PARAMETER_NAME = "DiscoverMode";
+    private const string IDENTIFY_MODE_PARAMETER_NAME = "IdentifyMode";
+    private const string DISCOVER_RANGE_PARAMETER_NAME = "DiscoverRange";
+    private const string IDENTIFY_RANGE_PARAMETER_NAME = "IdentifyRange";
+    private const string LOCAL_THRESHOLD_PARAMETER_NAME = "LocalThreshold";
+
     public ScannedResource(ConfigNode c)
     {
       Load(c);
@@ -34,11 +40,11 @@ namespace SpaceDust
     public void Load(ConfigNode c)
     {
       c.TryGetValue("name", ref Name);
-      c.TryGetEnum<DiscoverMode>("DiscoverMode", ref DiscoverMode, DiscoverMode.Local);
-      c.TryGetEnum<DiscoverMode>("IdentifyMode", ref IdentifyMode, DiscoverMode.Local);
-      c.TryGetValue("LocalThreshold", ref LocalThreshold);
-      c.TryGetValue("DiscoverRange", ref DiscoverRange);
-      c.TryGetValue("IdentifyRange", ref IdentifyRange);
+      c.TryGetEnum<DiscoverMode>(DISCOVER_MODE_PARAMETER_NAME, ref DiscoverMode, DiscoverMode.Local);
+      c.TryGetEnum<DiscoverMode>(IDENTIFY_MODE_PARAMETER_NAME, ref IdentifyMode, DiscoverMode.Local);
+      c.TryGetValue(LOCAL_THRESHOLD_PARAMETER_NAME, ref LocalThreshold);
+      c.TryGetValue(DISCOVER_RANGE_PARAMETER_NAME, ref DiscoverRange);
+      c.TryGetValue(IDENTIFY_RANGE_PARAMETER_NAME, ref IdentifyRange);
     }
 
     /// <summary>
