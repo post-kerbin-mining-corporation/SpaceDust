@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SpaceDust
@@ -13,15 +11,18 @@ namespace SpaceDust
   /// </summary>
   public static class Settings
   {
-    // Emit UI debug messages
+    /// Emit UI debug messages
     public static bool DebugUI = true;
-    // Emit Overlay debug messages
+    /// Emit Overlay debug messages
     public static bool DebugOverlay = true;
-    // Emit module  debug messages
+    /// Emit module  debug messages
     public static bool DebugModules = true;
-    // Emit module  debug messages
+    /// Emit background  debug messages
     public static bool DebugBackground = true;
+    /// Emit background  debug messages
+    public static bool DebugLoading = true;
 
+    /// Whether SystemHeat has been installed or not
     public static bool SystemHeatActive = false;
 
     public static bool SetAllDiscovered = false;
@@ -31,6 +32,7 @@ namespace SpaceDust
     public static float BaseIdentifyScienceReward = 5f;
     public static float GameScale = 1f;
 
+    /// Parameters related to the particle visualizer
     public static int particleFieldBaseCount = 2000;
     public static float particleFieldBaseSize = 2f;
     public static float particleFieldMaxViewportParticleScale = 0.01f;
@@ -39,6 +41,12 @@ namespace SpaceDust
     public static string particleFieldTextureUrl = "SpaceDust/Assets/spacedust-particle-dust";
     public static string particleFieldTrailTextureUrl = "SpaceDust/Assets/particleTextureTrail";
     public static Color resourceDiscoveredColor = new Color(0.5f, 0.5f, 0.5f);
+
+    public static string PERSISTENCE_DATA_NODE_NAME = "DISCOVERYDATA";
+    public static string RESOURCE_DATA_NODE_NAME = "SPACEDUST_RESOURCE";
+    public static string SETTINGS_DATA_NODE_NAME = "SPACEDUSTSETTINGS";
+    public static string INSTRUMENT_DATA_NODE_NAME = "SPACEDUST_INSTRUMENT";
+
     public static Dictionary<string, Color> resourceColors = new Dictionary<string, Color>
     {
       ["XenonGas"] = new Color(0.376f, 0.655f, 0.749f),
@@ -59,11 +67,11 @@ namespace SpaceDust
     {
       foreach (var a in AssemblyLoader.loadedAssemblies)
       {
-        // search for conflicting mods
+        /// search for conflicting mods
         if (a.name.StartsWith("SystemHeat", StringComparison.Ordinal))
         {
           Utils.Log("[Settings]: SystemHeat detected. Thermal considerations will be active for harvesters");
-          // THIS IS OFF BY DEFAULT
+          /// THIS IS OFF BY DEFAULT
           return true;
         }
       }
@@ -90,7 +98,7 @@ namespace SpaceDust
       SystemHeatActive = CheckSystemHeat();
       Utils.Log("[Settings]: Started loading");
 
-      ConfigNode[] settingsNodes = GameDatabase.Instance.GetConfigNodes("SPACEDUSTSETTINGS");
+      ConfigNode[] settingsNodes = GameDatabase.Instance.GetConfigNodes(SETTINGS_DATA_NODE_NAME);
       if (settingsNodes.Length > 0)
       {
         settingsNode = settingsNodes[0];
@@ -99,6 +107,7 @@ namespace SpaceDust
         settingsNode.TryGetValue("DebugOverlay", ref DebugOverlay);
         // Emit module  debug messages
         settingsNode.TryGetValue("DebugModules", ref DebugModules);
+        settingsNode.TryGetValue("DebugLoading", ref DebugLoading);
 
         settingsNode.TryGetValue("SetAllDiscovered", ref SetAllDiscovered);
         settingsNode.TryGetValue("SetAllIdentified", ref SetAllIdentified);
@@ -143,7 +152,6 @@ namespace SpaceDust
       {
         Utils.Log("[Settings]: Couldn't find settings file, using defaults");
       }
-
 
       Utils.Log("[Settings]: Finished loading");
     }

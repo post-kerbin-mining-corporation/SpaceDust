@@ -7,7 +7,6 @@ using System.Security.Permissions;
 
 namespace SpaceDust
 {
-
   public class InstrumentSlot
   {
     public string SlotName;

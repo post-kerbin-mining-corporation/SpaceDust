@@ -8,13 +8,16 @@ using UnityEngine;
 
 namespace SpaceDust
 {
+  /// <summary>
+  /// Creates the toolbar panel and manages the app launcher
+  /// </summary>
   [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
   public class ToolbarUI : MonoBehaviour
   {
     public static ToolbarUI Instance { get; private set; }
     // Control Vars
     protected static bool showWindow = false;
-
+    protected static bool pinnedOn = false;
 
     // Panel
     protected ToolbarPanel toolbarPanel;
@@ -43,12 +46,20 @@ namespace SpaceDust
       Instance = this;
     }
 
-
+    public void Start()
+    {
+      if (ApplicationLauncher.Ready)
+      {
+        OnGUIAppLauncherReady();
+      }
+    }
 
     public void OnMapEntered()
     {
       if (Settings.DebugUI)
+      {
         Utils.Log($"[ToolbarUI] Entering map view, focus on {PlanetariumCamera.fetch.target.DisplayName}");
+      }
       CelestialBody body = PlanetariumCamera.fetch.target.celestialBody;
       if (body == null)
       {
@@ -56,29 +67,37 @@ namespace SpaceDust
       }
       RefreshResources(body);
     }
+
     public void OnMapExited()
     {
       if (Settings.DebugUI)
+      {
         Utils.Log($"[ToolbarUI] Exiting map view");
+      }
       if (toolbarPanel != null)
         toolbarPanel.SetVisible(false);
     }
     public void OnMapFocusChange(MapObject mapObject)
     {
       if (Settings.DebugUI)
+      {
         Utils.Log($"[ToolbarUI] Changed focus to {mapObject.GetName()}");
+      }
       if (mapObject != null)
-
       {
         CelestialBody body = mapObject.celestialBody;
         if (body == null)
         {
-          body = mapObject.vessel.mainBody;
+          body = mapObject.orbit.referenceBody;
         }
         RefreshResources(body);
       }
     }
 
+    /// <summary>
+    /// Refreshes the resource display
+    /// </summary>
+    /// <param name="body"></param>
     public void RefreshResources(CelestialBody body)
     {
       DestroyResources();
@@ -99,11 +118,22 @@ namespace SpaceDust
       }
     }
 
+    /// <summary>
+    /// Sets a resource to be visible in the toolbar panel
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="shown"></param>
     public void SetResourceVisible(string resourceName, bool shown)
     {
       if (resourceVisibilities.ContainsKey(resourceName))
         resourceVisibilities[resourceName] = shown;
     }
+
+    /// <summary>
+    /// Is a resource visible in the toolbar panel?
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <returns></returns>
     public bool IsVisible(string resourceName)
     {
       if (resourceVisibilities.ContainsKey(resourceName))
@@ -111,29 +141,30 @@ namespace SpaceDust
 
       return false;
     }
+
+    /// <summary>
+    /// Just nuke the entries
+    /// </summary>
     protected void DestroyResources()
     {
       if (toolbarPanel != null)
         toolbarPanel.RemoveResourceEntries();
     }
 
-    public void Start()
-    {
-
-      if (ApplicationLauncher.Ready)
-        OnGUIAppLauncherReady();
-
-
-    }
-
+    /// <summary>
+    /// Creates the toolbar panel
+    /// </summary>
     protected void CreateToolbarPanel()
     {
-      GameObject newUIPanel = (GameObject)Instantiate(UILoader.ToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
+      GameObject newUIPanel = (GameObject)Instantiate(SpaceDustAssets.ToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
       newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
       newUIPanel.transform.localPosition = Vector3.zero;
       toolbarPanel = newUIPanel.AddComponent<ToolbarPanel>();
       toolbarPanel.SetVisible(false);
     }
+    /// <summary>
+    /// Destroys the toolbar panel
+    /// </summary>
     protected void DestroyToolbarPanel()
     {
       if (toolbarPanel != null && toolbarPanel.gameObject != null)
@@ -142,10 +173,27 @@ namespace SpaceDust
       }
     }
 
-
-    public void ToggleAppLauncher()
+    /// <summary>
+    /// Hover state 
+    /// </summary>
+    public void SetHoverState(bool on)
     {
-      showWindow = !showWindow;
+      if (pinnedOn)
+        return;
+
+      showWindow = on;
+      toolbarPanel.SetVisible(showWindow);
+    }
+
+    /// <summary>
+    /// Clicked state
+    /// </summary>
+    /// <param name="on"></param>
+    public void SetClickedState(bool on)
+    {
+      pinnedOn = on;
+      showWindow = pinnedOn;
+
       toolbarPanel.SetVisible(showWindow);
       if (showWindow)
       {
@@ -155,19 +203,26 @@ namespace SpaceDust
       {
         MapOverlay.Instance.SetVisible(false);
       }
-
     }
+
 
     void Update()
     {
       if (showWindow && toolbarPanel)
       {
-
         if (HighLogic.LoadedSceneHasPlanetarium)
         {
-          toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width + 50f, toolbarPanel.rect.rect.height, 0f);
+          if (HighLogic.LoadedSceneIsFlight)
+          {
+            toolbarPanel.rect.pivot = new Vector2(1, 1);
+            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL();
+          }
+          else
+          {
+            toolbarPanel.rect.pivot = new Vector2(1, 0);
+            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUR();
+          }
         }
-        
       }
     }
 
@@ -183,17 +238,8 @@ namespace SpaceDust
 
       GameEvents.OnMapEntered.Remove(OnMapEntered);
       GameEvents.OnMapFocusChange.Remove(OnMapFocusChange);
-
       GameEvents.OnMapExited.Remove(OnMapExited);
-      
     }
-
-    protected void OnToolbarButtonToggle()
-    {
-      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
-      ToggleAppLauncher();
-    }
-
 
     protected void OnGUIAppLauncherReady()
     {
@@ -201,14 +247,14 @@ namespace SpaceDust
       if (ApplicationLauncher.Ready && stockToolbarButton == null)
       {
         stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-            OnToolbarButtonToggle,
-            OnToolbarButtonToggle,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
-            (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
+          OnToolbarButtonOn,
+          OnToolbarButtonOff,
+          OnToolbarButtonHover,
+          OnToolbarButtonHoverOut,
+          DummyVoid,
+          DummyVoid,
+          ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
+          (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
       CreateToolbarPanel();
     }
@@ -223,19 +269,31 @@ namespace SpaceDust
       DestroyToolbarPanel();
     }
 
-
     protected void OnGUIAppLauncherUnreadifying(GameScenes scene)
     {
-
-
       DestroyToolbarPanel();
     }
 
-    protected void onAppLaunchToggleOff()
+    protected void OnToolbarButtonHover()
     {
-      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetHoverState(true);
     }
-
+    protected void OnToolbarButtonHoverOut()
+    {
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetHoverState(false);
+    }
+    protected void OnToolbarButtonOn()
+    {
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetClickedState(true);
+    }
+    protected void OnToolbarButtonOff()
+    {
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetClickedState(false);
+    }
     protected void DummyVoid() { }
 
     public void ResetAppLauncher()
@@ -243,19 +301,16 @@ namespace SpaceDust
       if (stockToolbarButton == null)
       {
         stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-            OnToolbarButtonToggle,
-            OnToolbarButtonToggle,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
-            (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
+          OnToolbarButtonOn,
+          OnToolbarButtonOff,
+          OnToolbarButtonHover,
+          OnToolbarButtonHoverOut,
+          DummyVoid,
+          DummyVoid,
+          ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
+          (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
-
     }
     #endregion
-
-
   }
 }

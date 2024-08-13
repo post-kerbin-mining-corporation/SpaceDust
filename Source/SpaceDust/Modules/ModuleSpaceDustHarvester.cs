@@ -1,5 +1,4 @@
 ﻿using KSP.Localization;
-using Smooth.Algebraics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using UnityEngine;
 
 namespace SpaceDust
 {
-  public enum HarvesterType
+  public enum HarvestType
   {
     Atmosphere,
     Exosphere,
@@ -70,7 +69,7 @@ namespace SpaceDust
     public FloatCurve IntakeVelocityScale;
 
     [KSPField(isPersistant = false)]
-    public HarvesterType HarvestType;
+    public HarvestType HarvestType;
 
     [KSPField(isPersistant = false)]
     public String HarvestIntakeTransformName;
@@ -412,7 +411,7 @@ namespace SpaceDust
     void DoFocusedHarvesting(double scale)
     {
 
-      if (HarvestType == HarvesterType.Atmosphere && part.vessel.atmDensity > 0d)
+      if (HarvestType == HarvestType.Atmosphere)
       {
         if (part.vessel.atmDensity <= 0d)
         {
@@ -422,54 +421,56 @@ namespace SpaceDust
           Fields["IntakeSpeed"].guiActive = false;
           return;
         }
-        Vector3d worldVelocity = part.vessel.srf_velocity;
-        double mach = part.vessel.mach;
-
-        Vector3 intakeVector;
-        Transform intakeTransform;
-        if (HarvestIntakeTransform == null)
-          intakeTransform = this.transform;
         else
-          intakeTransform = HarvestIntakeTransform;
-
-        if (CheckOcclusion && Physics.Raycast(intakeTransform.position, intakeTransform.forward, RaycastDistance))
         {
-          ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Blocked");
-          Fields["ThermalUI"].guiActive = false;
-          Fields["IntakeSpeed"].guiActive = false;
-          return;
-        }
+          Vector3d worldVelocity = part.vessel.srf_velocity;
+          double mach = part.vessel.mach;
 
-        intakeVector = intakeTransform.forward;
-        double dot = Vector3d.Dot(worldVelocity, intakeVector);
-        float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) * IntakeVelocityScale.Evaluate((float)mach) + IntakeSpeedStatic) * IntakeArea;
-        IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", Utils.ToSI(intakeVolume, "G2"));
-        ScoopUI = "";
+          Vector3 intakeVector;
+          Transform intakeTransform;
+          if (HarvestIntakeTransform == null)
+            intakeTransform = this.transform;
+          else
+            intakeTransform = HarvestIntakeTransform;
 
-        for (int i = 0; i < resources.Count; i++)
-        {
-          double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
-            part.vessel.mainBody,
-            vessel.altitude + part.vessel.mainBody.Radius,
-            vessel.latitude,
-            vessel.longitude);
-
-          if (resourceSample > resources[i].MinHarvestValue)
+          if (CheckOcclusion && Physics.Raycast(intakeTransform.position, intakeTransform.forward, RaycastDistance))
           {
-            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
-            if (ScoopUI != "")
-              ScoopUI += "\n";
-            ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
-            part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
+            ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Blocked");
+            Fields["ThermalUI"].guiActive = false;
+            Fields["IntakeSpeed"].guiActive = false;
+            return;
           }
 
+          intakeVector = intakeTransform.forward;
+          double dot = Vector3d.Dot(worldVelocity, intakeVector);
+          float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) * IntakeVelocityScale.Evaluate((float)mach) + IntakeSpeedStatic) * IntakeArea;
+          IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", Utils.ToSI(intakeVolume, "G2"));
+          ScoopUI = "";
+
+          for (int i = 0; i < resources.Count; i++)
+          {
+            double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
+              part.vessel.mainBody,
+              vessel.altitude + part.vessel.mainBody.Radius,
+              vessel.latitude,
+              vessel.longitude);
+
+            if (resourceSample > resources[i].MinHarvestValue)
+            {
+              double resAmt = (resourceSample * intakeVolume) * (1d / resources[i].density) * resources[i].BaseEfficiency * scale;
+                ScoopUI += "\n ";
+              ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
+              part.RequestResource(resources[i].Name, -resAmt * resources[i].density * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
+            }
+
+          }
+          if (ScoopUI == "")
+            ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
         }
-        if (ScoopUI == "")
-          ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
       }
 
 
-      if (HarvestType == HarvesterType.Exosphere && part.vessel.atmDensity == 0d)
+      if (HarvestType == HarvestType.Exosphere)
       {
         if (part.vessel.atmDensity > 0d)
         {
@@ -478,52 +479,55 @@ namespace SpaceDust
           Fields["IntakeSpeed"].guiActive = false;
           return;
         }
-
-
-        Vector3d worldVelocity = part.vessel.obt_velocity;
-        Vector3 intakeVector;
-        if (HarvestIntakeTransform == null)
-          intakeVector = this.transform.forward;
         else
-          intakeVector = HarvestIntakeTransform.forward;
-
-
-        double dot = Vector3d.Dot(worldVelocity.normalized, intakeVector.normalized);
-        float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) + IntakeSpeedStatic) * IntakeArea;
-        IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", intakeVolume.ToString("G2"));
-
-        ScoopUI = "";
-
-        for (int i = 0; i < resources.Count; i++)
         {
-          double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
-            part.vessel.mainBody,
-            vessel.altitude + part.vessel.mainBody.Radius,
-            vessel.latitude,
-            vessel.longitude);
 
-          if (resourceSample * intakeVolume * resources[i].BaseEfficiency > resources[i].MinHarvestValue)
+
+          Vector3d worldVelocity = part.vessel.obt_velocity;
+          Vector3 intakeVector;
+          if (HarvestIntakeTransform == null)
+            intakeVector = this.transform.forward;
+          else
+            intakeVector = HarvestIntakeTransform.forward;
+
+
+          double dot = Vector3d.Dot(worldVelocity.normalized, intakeVector.normalized);
+          float intakeVolume = (float)(worldVelocity.magnitude * MathExtensions.Clamp(dot, 0d, 1d) + IntakeSpeedStatic) * IntakeArea;
+          IntakeSpeed = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_IntakeSpeed_Normal", intakeVolume.ToString("G2"));
+
+          ScoopUI = "";
+
+          for (int i = 0; i < resources.Count; i++)
           {
-            //Utils.Log($"[SpaceDustHarvesterd] sampled {resources[i].Name} @ {resourceSample}, " +
-            //  $"minH {resources[i].MinHarvestValue}," +
-            //  $"effic {resources[i].BaseEfficiency}," +
-            //  $"volume {intakeVolume}," +
-            //  $"area {IntakeArea}," +
-            //  $"speedstatic {IntakeSpeedStatic}," +
-            //  $"worldvel {worldVelocity.magnitude}");
+            double resourceSample = SpaceDustResourceMap.Instance.SampleResource(resources[i].Name,
+              part.vessel.mainBody,
+              vessel.altitude + part.vessel.mainBody.Radius,
+              vessel.latitude,
+              vessel.longitude);
 
-            double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
-            if (ScoopUI != "")
-              ScoopUI += "\n";
-            ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
+            if (resourceSample * intakeVolume * resources[i].BaseEfficiency > resources[i].MinHarvestValue)
+            {
+              //Utils.Log($"[SpaceDustHarvesterd] sampled {resources[i].Name} @ {resourceSample}, " +
+              //  $"minH {resources[i].MinHarvestValue}," +
+              //  $"effic {resources[i].BaseEfficiency}," +
+              //  $"volume {intakeVolume}," +
+              //  $"area {IntakeArea}," +
+              //  $"speedstatic {IntakeSpeedStatic}," +
+              //  $"worldvel {worldVelocity.magnitude}");
 
-            //Utils.Log($"[SpaceDustHarveste] sampled {resources[i].Name} @ {resourceSample}. Harvesting {resAmt * TimeWarp.fixedDeltaTime} at step {TimeWarp.fixedDeltaTime}");
-            part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
+              double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
+              if (ScoopUI != "")
+                ScoopUI += "\n";
+              ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
+
+              //Utils.Log($"[SpaceDustHarveste] sampled {resources[i].Name} @ {resourceSample}. Harvesting {resAmt * TimeWarp.fixedDeltaTime} at step {TimeWarp.fixedDeltaTime}");
+              part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
+            }
+
           }
-
+          if (ScoopUI == "")
+            ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
         }
-        if (ScoopUI == "")
-          ScoopUI = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource_None");
       }
 
     }

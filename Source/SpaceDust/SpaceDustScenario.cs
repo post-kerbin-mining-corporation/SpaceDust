@@ -3,69 +3,9 @@ using System.Collections.Generic;
 
 namespace SpaceDust
 {
-
-  public class SpaceDustDiscoveryData
-  {
-    public string ResourceName = "noResource";
-    public string BodyName = "noBody";
-    public string BandName = "noBand";
-    public bool Discovered = false;
-    public bool Identified = false;
-    public float discoveryPercent = 0f;
-    public float identifyPercent = 0f;
-
-
-    public SpaceDustDiscoveryData()
-    { }
-    public SpaceDustDiscoveryData(string resourceName, string bandName, string bodyName, bool isDiscovered, bool isIdentified)
-    {
-      ResourceName = resourceName;
-      BodyName = bodyName;
-      BandName = bandName;
-      Discovered = isDiscovered;
-      Identified = isIdentified;
-      if (isDiscovered)
-        discoveryPercent = 100f;
-      if (isIdentified)
-        identifyPercent = 100f;
-    }
-
-
-    public SpaceDustDiscoveryData(ConfigNode node)
-    {
-      Load(node);
-    }
-    public void Load(ConfigNode node)
-    {
-      node.TryGetValue("resourceName", ref ResourceName);
-      node.TryGetValue("bodyName", ref BodyName);
-      node.TryGetValue("bandName", ref BandName);
-      node.TryGetValue("discovered", ref Discovered);
-      node.TryGetValue("identified", ref Identified);
-      node.TryGetValue("discoveryPercent", ref discoveryPercent);
-      node.TryGetValue("identifyPercent", ref identifyPercent);
-    }
-
-    public ConfigNode Save()
-    {
-      ConfigNode node = new ConfigNode();
-      node.name = "DISCOVERYDATA";
-      node.AddValue("resourceName", ResourceName);
-      node.AddValue("bodyName", BodyName);
-      node.AddValue("bandName", BandName);
-      node.AddValue("discovered", Discovered);
-      node.AddValue("identified", Identified);
-      node.AddValue("discoveryPercent", discoveryPercent);
-      node.AddValue("identifyPercent", identifyPercent);
-      return node;
-    }
-
-    public new string ToString()
-    {
-      return $"DiscoveryData(Band {BandName} around {BodyName} containing {ResourceName}: Discovered  = {discoveryPercent}% ({Discovered}),Identified = {identifyPercent}% ({Identified}))";
-    }
-  }
-
+  /// <summary>
+  /// Manages persistence and tracking of discovery data
+  /// </summary>
   [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER, GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.EDITOR)]
   public class SpaceDustScenario : ScenarioModule
   {
@@ -74,25 +14,35 @@ namespace SpaceDust
 
     protected List<SpaceDustDiscoveryData> distributionData;
 
+    private const string BAND_DISCOVERED_MESSAGE_KEY = "#LOC_SpaceDust_Message_Discovery";
+    private const string BAND_IDENTIFIED_MESSAGE_KEY = "#LOC_SpaceDust_Message_Identified";
+
     public override void OnAwake()
     {
       Utils.Log("[SpaceDustScenario]: Awake");
       Instance = this;
       base.OnAwake();
     }
-
+    /// <summary>
+    /// Loads all the discovery data from the persistence node
+    /// </summary>
+    /// <param name="node"></param>
     public override void OnLoad(ConfigNode node)
     {
       Utils.Log("[SpaceDustScenario]: Started Loading");
       base.OnLoad(node);
       if (distributionData == null) distributionData = new List<SpaceDustDiscoveryData>();
-      foreach (ConfigNode saveNode in node.GetNodes("DISCOVERYDATA"))
+      foreach (ConfigNode saveNode in node.GetNodes(Settings.PERSISTENCE_DATA_NODE_NAME))
       {
         distributionData.Add(new SpaceDustDiscoveryData(saveNode));
       }
       Utils.Log("[SpaceDustScenario]: Done Loading");
     }
 
+    /// <summary>
+    /// Saves the discovery data to the persistence node
+    /// </summary>
+    /// <param name="node"></param>
     public override void OnSave(ConfigNode node)
     {
       Utils.Log("[SpaceDustScenario]: Started Saving");
@@ -107,6 +57,13 @@ namespace SpaceDust
       }
       Utils.Log("[SpaceDustScenario]: Done Saving");
     }
+
+    /// <summary>
+    /// Returns true if any resource has been discovered around a given CB
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public bool IsAnyDiscovered(string resourceName, CelestialBody b)
     {
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
@@ -117,10 +74,26 @@ namespace SpaceDust
       return false;
 
     }
+
+    /// <summary>
+    /// Returns true if a particular resource band has been discovered around a body
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="bandName"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public bool IsDiscovered(string resourceName, string bandName, CelestialBody b)
     {
       return IsDiscovered(resourceName, bandName, b.bodyName);
     }
+
+    /// <summary>
+    /// Returns true if a particular resource band has been discovered around a body by name
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="bandName"></param>
+    /// <param name="bodyName"></param>
+    /// <returns></returns>
     public bool IsDiscovered(string resourceName, string bandName, string bodyName)
     {
       if (Settings.SetAllDiscovered)
@@ -133,6 +106,13 @@ namespace SpaceDust
         return false;
       return true;
     }
+
+    /// <summary>
+    /// Returns true if a resource has been identified around a body
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public bool IsAnyIdentified(string resourceName, CelestialBody b)
     {
       if (Settings.SetAllIdentified)
@@ -145,10 +125,26 @@ namespace SpaceDust
       return false;
 
     }
+
+    /// <summary>
+    /// Returns true if a particular resource band has been Identified around a body
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="bandName"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public bool IsIdentified(string resourceName, string bandName, CelestialBody b)
     {
       return IsIdentified(resourceName, bandName, b.bodyName);
     }
+
+    /// <summary>
+    /// Returns true if a particular resource band has been Identified around a body by name
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="bandName"></param>
+    /// <param name="bodyName"></param>
+    /// <returns></returns>
     public bool IsIdentified(string resourceName, string bandName, string bodyName)
     {
       if (Settings.SetAllIdentified)
@@ -162,6 +158,11 @@ namespace SpaceDust
       return true;
     }
 
+    /// <summary>
+    /// Set all bands containing the specified resource to be Discovered around a body
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="b"></param>
     public void DiscoverResourceBandsAtBody(string resourceName, CelestialBody b)
     {
       foreach (ResourceBand band in SpaceDustResourceMap.Instance.GetBodyDistributions(b, resourceName))
@@ -169,14 +170,34 @@ namespace SpaceDust
         DiscoverResourceBand(resourceName, band, b.bodyName, true);
       }
     }
+    /// <summary>
+    /// Sets a specific band around a body to be Discovered
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="band"></param>
+    /// <param name="b"></param>
     public void DiscoverResourceBand(string resourceName, ResourceBand band, CelestialBody b)
     {
       DiscoverResourceBand(resourceName, band, b.bodyName, true);
     }
+    /// <summary>
+    /// Sets a specific band around a body to be Discovered with the addition of some Science points
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="band"></param>
+    /// <param name="b"></param>
+    /// <param name="addScience"></param>
     public void DiscoverResourceBand(string resourceName, ResourceBand band, CelestialBody b, bool addScience)
     {
       DiscoverResourceBand(resourceName, band, b.bodyName, addScience);
     }
+    /// <summary>
+    /// Sets a specific band around a body by name to be Discovered with the addition of some Science points
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="band"></param>
+    /// <param name="bodyName"></param>
+    /// <param name="addScience"></param>
     public void DiscoverResourceBand(string resourceName, ResourceBand band, string bodyName, bool addScience)
     {
       if (!IsDiscovered(resourceName, band.name, bodyName))
@@ -200,7 +221,7 @@ namespace SpaceDust
         }
         if (HighLogic.LoadedSceneIsFlight)
         {
-          ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Discovery", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
+          ScreenMessage msg = new ScreenMessage(Localizer.Format(BAND_DISCOVERED_MESSAGE_KEY, resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
           ScreenMessages.PostScreenMessage(msg);
         }
         Utils.Log($"[SpaceDustScenario]: Discovered {resourceName} in {band.name} at {bodyName}");
@@ -251,7 +272,7 @@ namespace SpaceDust
         }
         if (HighLogic.LoadedSceneIsFlight)
         {
-          ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Identified", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
+          ScreenMessage msg = new ScreenMessage(Localizer.Format(BAND_IDENTIFIED_MESSAGE_KEY, resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
           ScreenMessages.PostScreenMessage(msg);
         }
         Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {band.name} at {bodyName}");
@@ -262,9 +283,11 @@ namespace SpaceDust
 
           ResearchAndDevelopment.Instance.AddScience(scienceValue, TransactionReasons.ScienceTransmission);
         }
-       
+
       }
     }
+
+
 
     public void AddDiscoveryAtBody(string resourceName, CelestialBody b, float amount)
     {
@@ -295,7 +318,7 @@ namespace SpaceDust
         {
           foreach (SpaceDustDiscoveryData data in toDiscover)
           {
-            
+
             data.discoveryPercent += amount * band.RemoteDiscoveryScale;
             if (data.discoveryPercent >= 100f)
             {
@@ -362,6 +385,13 @@ namespace SpaceDust
       return progress / maxProgress * 100f;
     }
 
+    /// <summary>
+    /// Get how discovered a band around a body is
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="bandName"></param>
+    /// <param name="bodyName"></param>
+    /// <returns></returns>
     public float GetBandSurveyProgress(string resourceName, string bandName, string bodyName)
     {
 
@@ -383,7 +413,7 @@ namespace SpaceDust
       }
       if (HighLogic.LoadedSceneIsFlight)
       {
-        ScreenMessage msg = new ScreenMessage(Localizer.Format("#LOC_SpaceDust_Message_Identified", resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
+        ScreenMessage msg = new ScreenMessage(Localizer.Format(BAND_IDENTIFIED_MESSAGE_KEY, resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
         ScreenMessages.PostScreenMessage(msg);
       }
       Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {bandName} at {bodyName}");

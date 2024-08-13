@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using KSP.Localization;
 
 namespace SpaceDust
 {
+  /// <summary>
   /// Represents a continuous band of a single resource
+  /// </summary>
   public class ResourceBand
   {
 
@@ -14,25 +13,24 @@ namespace SpaceDust
     public string title = "GenericBand";
     public string ResourceName { get; private set; }
     public double Abundance { get; private set; }
-
     public float ParticleCountScale { get; private set; }
     public float ParticleRotateRate { get; private set; }
 
     public bool AlwaysDiscovered = false;
     public bool AlwaysIdentified = false;
     public float RemoteDiscoveryScale = 1f;
+    public HarvestType BandType;
 
     public float discoveryScienceReward = 1f;
     public float identifyScienceReward = 1f;
 
-    float countScale = 1f;
-    float rotateRate = 1f;
-    double minAbundance = 0d;
-    double maxAbundance = 0d;
-    bool useAirDensity = false;
-
-    FloatCurve densityCurve;
-    CelestialBody associatedBody;
+    private float countScale = 1f;
+    private float rotateRate = 1f;
+    private double minAbundance = 0d;
+    private double maxAbundance = 0d;
+    private bool useAirDensity = false;
+    private FloatCurve densityCurve;
+    private CelestialBody associatedBody;
 
     public DistributionModel Distribution { get; private set; }
 
@@ -44,6 +42,7 @@ namespace SpaceDust
 
       node.TryGetValue("name", ref name);
       node.TryGetValue("title", ref title);
+      node.TryGetEnum<HarvestType>("bandType", ref BandType, HarvestType.Atmosphere);
       node.TryGetValue("countScale", ref countScale);
       node.TryGetValue("rotateRate", ref rotateRate);
 
@@ -122,7 +121,13 @@ namespace SpaceDust
       return false;
     }
 
+    /// <summary>
     /// Sample the resource band
+    /// </summary>
+    /// <param name="altitude"></param>
+    /// <param name="latitude"></param>
+    /// <param name="longitude"></param>
+    /// <returns>amount of resource in t/m3</returns>
     public double Sample(double altitude, double latitude, double longitude)
     {
       double sampleResult = Abundance * Distribution.Sample(altitude, latitude, longitude);
