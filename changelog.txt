@@ -1,6 +1,7 @@
 v0.5.0
 ------
 - Updated bundled MM to latest version
+- UI now generally displays in t/m3 and t/s. This is to facilitiate comparisons between resources
 - Improved the Resource Overlay
 -- When a Resource is toggled on, mousing over a distribution in the map view will show a tooltip that describes the resource
 -- Resources that are identified will show a max concentration, unidentified will show unknown

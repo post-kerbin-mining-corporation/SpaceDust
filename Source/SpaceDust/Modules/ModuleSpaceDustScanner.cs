@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using KSP.Localization;
 
 namespace SpaceDust
@@ -185,7 +183,6 @@ namespace SpaceDust
             {
               double consumption = part.RequestResource(PartResourceLibrary.ElectricityHashcode, chargeRequest);
               if (consumption >= chargeRequest - 0.0001)
-
               {
                 // do scanning
                 for (int i = 0; i < resources.Count; i++)
@@ -232,9 +229,7 @@ namespace SpaceDust
                   // This mode discovers all bands at the body
                   if (resources[i].IdentifyMode == DiscoverMode.SOI)
                   {
-
                     SpaceDustScenario.Instance.IdentifyResourceBandsAtBody(resources[i].Name, vessel.mainBody);
-
                   }
                   // This mode discovers modes if we are close enough 
                   if (resources[i].IdentifyMode == DiscoverMode.Altitude)
@@ -265,8 +260,8 @@ namespace SpaceDust
                     }
                   }
 
-                  if (message != "")
-                    message += "\n";
+                  //if (message != "")
+                  message += "\n ";
                   message += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Resources_SingleSample", resources[i].Name, resourceSample.ToString("G2"));
                 }
 
@@ -281,8 +276,6 @@ namespace SpaceDust
               message = Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustScanner_Field_Resources_NoPower");
             }
           }
-
-
         }
         else
         {
@@ -304,7 +297,6 @@ namespace SpaceDust
         {
           if (Enabled)
           {
-
             foreach (AnimationState anim in scanState)
             {
               anim.speed = 1f;
@@ -313,7 +305,6 @@ namespace SpaceDust
           }
           else
           {
-
             foreach (AnimationState anim in scanState)
             {
               anim.speed = -1f;

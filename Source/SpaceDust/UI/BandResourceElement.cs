@@ -75,7 +75,7 @@ namespace SpaceDust.Overlay
         concentration.enabled = true;
 
         bandName.text = bnd.title;
-        double smple = bnd.Abundance / PartResourceLibrary.Instance.GetDefinition(bnd.ResourceName).density;
+        double smple = bnd.Abundance;
         concentration.text = Localizer.Format(BAND_CONCENTRATION_KEY, smple.ToString("G3"));
         icon.sprite = SpaceDustAssets.Sprites[SpriteMap[bnd.BandType]];
       }

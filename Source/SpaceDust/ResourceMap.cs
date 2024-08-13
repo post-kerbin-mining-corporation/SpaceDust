@@ -47,7 +47,7 @@ namespace SpaceDust
       }
     }
     /// <summary>
-    /// Samples a specified resource based on a location
+    /// Samples a specified resource based on a location and return a value in t/m3
     /// </summary>
     /// <param name="ResourceName"></param>
     /// <param name="body"></param>
@@ -64,7 +64,7 @@ namespace SpaceDust
         {
           if (Resources[body.name][i].ResourceName == ResourceName)
           {
-            sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude) / PartResourceLibrary.Instance.GetDefinition(ResourceName).density;
+            sampledTotal += Resources[body.name][i].Sample(altitude, latitude, longitude);
           }
         }
       }

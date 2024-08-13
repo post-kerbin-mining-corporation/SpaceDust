@@ -41,7 +41,7 @@ namespace SpaceDust
     }
 
     /// <summary>
-    /// Sample all the bands at this coordinate
+    /// Sample all the bands at this coordinate and returns a value in t/m3
     /// </summary>
     /// <param name="altitude"></param>
     /// <param name="latitude"></param>
@@ -52,7 +52,6 @@ namespace SpaceDust
       double sampleResult = 0d;
       for (int i = 0; i< Bands.Count ;i++)
       {
-        
         sampleResult += Bands[i].Sample(altitude, latitude, longitude);
       }
       return sampleResult;

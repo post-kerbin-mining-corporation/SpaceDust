@@ -121,7 +121,13 @@ namespace SpaceDust
       return false;
     }
 
+    /// <summary>
     /// Sample the resource band
+    /// </summary>
+    /// <param name="altitude"></param>
+    /// <param name="latitude"></param>
+    /// <param name="longitude"></param>
+    /// <returns>amount of resource in t/m3</returns>
     public double Sample(double altitude, double latitude, double longitude)
     {
       double sampleResult = Abundance * Distribution.Sample(altitude, latitude, longitude);
