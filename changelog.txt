@@ -1,5 +1,6 @@
 v0.5.0
 ------
+- Updated bundled MM to latest version
 - Improved the Resource Overlay
 -- When a Resource is toggled on, mousing over a distribution in the map view will show a tooltip that describes the resource
 -- Resources that are identified will show a max concentration, unidentified will show unknown
