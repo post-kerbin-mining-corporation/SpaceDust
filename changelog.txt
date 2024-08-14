@@ -1,5 +1,6 @@
 v0.5.1
 ------
+- Fixed an issue with density calculations that was not included in the previous release
 - VABOrganizer support
 
 v0.5.0
