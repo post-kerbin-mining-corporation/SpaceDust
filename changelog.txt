@@ -1,3 +1,8 @@
+v0.5.2
+------
+- Updated B9PartSwitch to 2.20.0
+- Fixed a MM patch that would set SystemHeat being present
+
 v0.5.1
 ------
 - Fixed an issue with density calculations that was not included in the previous release
