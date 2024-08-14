@@ -457,10 +457,10 @@ namespace SpaceDust
 
             if (resourceSample > resources[i].MinHarvestValue)
             {
-              double resAmt = (resourceSample * intakeVolume) * (1d / resources[i].density) * resources[i].BaseEfficiency * scale;
-                ScoopUI += "\n ";
+              double resAmt = (resourceSample * intakeVolume) * resources[i].BaseEfficiency * scale;
+              ScoopUI += "\n ";
               ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G5"));
-              part.RequestResource(resources[i].Name, -resAmt * resources[i].density * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
+              part.RequestResource(resources[i].Name, -resAmt * (1d / resources[i].density) * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
             }
 
           }
@@ -515,13 +515,13 @@ namespace SpaceDust
               //  $"speedstatic {IntakeSpeedStatic}," +
               //  $"worldvel {worldVelocity.magnitude}");
 
-              double resAmt = resourceSample * intakeVolume * 1d / resources[i].density * resources[i].BaseEfficiency * scale;
+              double resAmt = resourceSample * intakeVolume * resources[i].BaseEfficiency * scale;
               if (ScoopUI != "")
                 ScoopUI += "\n";
               ScoopUI += Localizer.Format("#LOC_SpaceDust_ModuleSpaceDustHarvester_Field_Scoop_Resource", resources[i].Name, resAmt.ToString("G3"));
 
               //Utils.Log($"[SpaceDustHarveste] sampled {resources[i].Name} @ {resourceSample}. Harvesting {resAmt * TimeWarp.fixedDeltaTime} at step {TimeWarp.fixedDeltaTime}");
-              part.RequestResource(resources[i].Name, -resAmt * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
+              part.RequestResource(resources[i].Name, -resAmt * (1d / resources[i].density) * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL, false);
             }
 
           }
