@@ -1,3 +1,7 @@
+v0.5.1
+------
+- VABOrganizer support
+
 v0.5.0
 ------
 - Updated bundled MM to latest version
