@@ -71,15 +71,13 @@ namespace SpaceDust
 
     public void onGameSceneLoadRequested(GameScenes scenes)
     {
-      if (Settings.DebugOverlay)
-        Utils.Log($"[MapOverlay] Load Requested");
+      Utils.Log($"[MapOverlay] Load Requested", LogType.Overlay);
       RemoveBodyFields();
     }
 
     public void OnMapEntered()
     {
-      if (Settings.DebugOverlay)
-        Utils.Log($"[MapOverlay] Entering map view, focus on {PlanetariumCamera.fetch.target.name}");
+      Utils.Log($"[MapOverlay] Entering map view, focus on {PlanetariumCamera.fetch.target.name}", LogType.Overlay);
       focusedBody = PlanetariumCamera.fetch.target.celestialBody;
       mapCamera = PlanetariumCamera.fetch.GetCameraTransform().GetComponent<Camera>();
       if (focusedBody == null)
@@ -91,8 +89,7 @@ namespace SpaceDust
     }
     public void OnMapExited()
     {
-      if (Settings.DebugOverlay)
-        Utils.Log($"[MapOverlay] Exiting map view");
+      Utils.Log($"[MapOverlay] Exiting map view", LogType.Overlay);
 
       RemoveBodyFields();
       DestroyInspectorPanel();
@@ -100,8 +97,7 @@ namespace SpaceDust
 
     public void OnMapFocusChange(MapObject mapObject)
     {
-      if (Settings.DebugOverlay)
-        Utils.Log($"[MapOverlay] Changed focus to {mapObject.name}");
+      Utils.Log($"[MapOverlay] Changed focus to {mapObject.name}", LogType.Overlay);
       if (mapObject != null)
 
       {
@@ -164,8 +160,7 @@ namespace SpaceDust
     /// </summary>
     private void RemoveBodyFields()
     {
-      if (Settings.DebugOverlay)
-        Utils.Log($"[MapOverlay]: Removing body fields");
+      Utils.Log($"[MapOverlay]: Removing body fields", LogType.Overlay);
       for (int i = drawnFields.Count - 1; i >= 0; i--)
       {
         Destroy(drawnFields[i].gameObject);
@@ -180,7 +175,7 @@ namespace SpaceDust
     /// <param name="body"></param>
     void GenerateBodyField(string resourceName, CelestialBody body)
     {
-      Utils.Log($"[MapOverlay]: Generating fields for {resourceName} around {body.name}");
+      Utils.Log($"[MapOverlay]: Generating fields for {resourceName} around {body.name}", LogType.Overlay);
       foreach (ResourceBand b in SpaceDustResourceMap.Instance.GetBodyDistributions(body, resourceName))
       {
         bool discovered = SpaceDustScenario.Instance.IsDiscovered(resourceName, b.name, body);
@@ -191,14 +186,14 @@ namespace SpaceDust
 
         if (HighLogic.LoadedSceneIsFlight)
         {
-          Utils.Log($"[MapOverlay]: Generating fields for {b.name} FLIGHT");
+          Utils.Log($"[MapOverlay]: Generating fields for {b.name} FLIGHT", LogType.Overlay);
           field.transform.SetParent(body.MapObject.trf);
           field.transform.localScale = Vector3.one;
           field.transform.localPosition = Vector3.zero;
         }
         if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
         {
-          Utils.Log($"[MapOverlay]: Generating fields for {b.name} TRACKER BRO");
+          Utils.Log($"[MapOverlay]: Generating fields for {b.name} TRACKING STATION", LogType.Overlay);
           field.transform.SetParent(body.MapObject.trf);
           field.transform.localScale = Vector3.one;
           field.transform.localPosition = Vector3.zero;
@@ -210,7 +205,7 @@ namespace SpaceDust
         field.SetVisible(ToolbarUI.Instance.IsVisible(resourceName));
         drawnFields.Add(field);
 
-        Utils.Log($"[MapOverlay]: Generated field for {body.name}.{b.name}");
+        Utils.Log($"[MapOverlay]: Generated field for {body.name}.{b.name}", LogType.Overlay);
       }
     }
 
@@ -232,7 +227,7 @@ namespace SpaceDust
             //Debug.Log($"{hitTransform}");
             if (hitTransform != hit.transform)
             {
-              
+
               hitTransform = hit.transform;
               Transform parent = hitTransform.parent;
               if (parent != null)

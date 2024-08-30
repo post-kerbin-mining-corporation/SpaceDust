@@ -70,10 +70,7 @@ namespace SpaceDust
     /// </summary>
     public void RemoveResourceEntries()
     {
-      if (Settings.DebugUI)
-      {
-        Utils.Log($"[ToolbarPanel] Clearing all entries");
-      }
+      Utils.Log($"[ToolbarPanel] Clearing all entries", LogType.UI);
       if (resourceEntries != null && resourceEntries.Count > 0)
       {
         for (int i = resourceEntries.Count - 1; i >= 0; i--)
@@ -94,10 +91,9 @@ namespace SpaceDust
     /// <param name="shown"></param>
     public void AddResourceEntry(CelestialBody body, string resourceName, List<ResourceBand> bands, bool shown)
     {
-      if (Settings.DebugUI)
-      {
-        Utils.Log($"[ToolbarPanel]: Adding a new resource element for {resourceName}");
-      }
+
+      Utils.Log($"[ToolbarPanel]: Adding a new resource element for {resourceName}", LogType.UI);
+
       noneText.gameObject.SetActive(false);
       GameObject newElement = (GameObject)Instantiate(SpaceDustAssets.ToolbarWidgetPrefab, Vector3.zero, Quaternion.identity);
 
@@ -107,10 +103,8 @@ namespace SpaceDust
       res.AssignResource(body, resourceName, bands, shown);
 
       resourceEntries.Add(res);
-      if (Settings.DebugUI)
-      {
-        Utils.Log($"[ToolbarPanel] Added a new resource entry for {resourceName}");
-      }
+      Utils.Log($"[ToolbarPanel] Added a new resource entry for {resourceName}", LogType.UI);
+
     }
   }
 }

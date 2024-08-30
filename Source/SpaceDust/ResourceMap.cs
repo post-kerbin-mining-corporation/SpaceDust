@@ -36,14 +36,14 @@ namespace SpaceDust
           throw new TypeLoadException(node.ToString());
         }
       }
-      Utils.Log($"[SpaceDustResourceMap]: Loaded {distros.Count} resource distributions");
+      Utils.Log($"[SpaceDustResourceMap]: Loaded {distros.Count} resource distributions", LogType.Loading);
       List<string> bodyKeys = distros.Select(x => x.Body).Distinct().ToList();
 
       foreach (string bodyKey in bodyKeys)
       {
         List<ResourceDistribution> bodyDists = distros.FindAll(x => x.Body == bodyKey).ToList();
         Resources.Add(bodyKey, bodyDists);
-        Utils.Log($"[SpaceDustResourceMap]: Loaded {bodyDists.Count} resource distributions for {bodyKey}");
+        Utils.Log($"[SpaceDustResourceMap]: Loaded {bodyDists.Count} resource distributions for {bodyKey}", LogType.Loading);
       }
     }
     /// <summary>

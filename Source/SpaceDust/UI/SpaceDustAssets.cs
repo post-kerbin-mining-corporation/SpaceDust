@@ -31,7 +31,7 @@ namespace SpaceDust
       ToolbarPanelPrefab = prefabs.LoadAsset("SpaceDustToolbar") as GameObject;
       OverlayInspectorPrefab = prefabs.LoadAsset("SpaceDustInspector") as GameObject;
 
-      Utils.Log("[SpaceDustAssets]: Loaded UI Prefabs");
+      Utils.Log("[SpaceDustAssets]: Loaded UI Prefabs", LogType.Loading);
       /// Get the Sprite Atlas
       Sprite[] spriteSheet = prefabs.LoadAssetWithSubAssets<Sprite>(SPRITE_ATLAS_NAME);
       Sprites = new Dictionary<string, Sprite>();
@@ -39,7 +39,7 @@ namespace SpaceDust
       {
         Sprites.Add(subSprite.name, subSprite);
       }
-      Utils.Log($"[SpaceDustAssets]: Loaded {Sprites.Count} sprites");
+      Utils.Log($"[SpaceDustAssets]: Loaded {Sprites.Count} sprites", LogType.Loading);
     }
   }
 }

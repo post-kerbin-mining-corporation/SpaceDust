@@ -5,20 +5,52 @@ using System;
 
 namespace SpaceDust
 {
+  public enum LogType
+  {
+    UI,
+    Loading,
+    Modules,
+    Overlay,
+    Background,
+    Persistence,
+    Any
+  }
   public static class Utils
   {
 
+    public static string logTag = "SpaceDust";
+
+    /// <summary>
+    /// Log a message with the mod name tag prefixed
+    /// </summary>
+    /// <param name="str">message string </param>
+    public static void Log(string str, LogType logType)
+    {
+      bool doLog = false;
+      if (logType == LogType.Background && Settings.DebugBackground) doLog = true;
+      if (logType == LogType.Loading && Settings.DebugLoading) doLog = true;
+      if (logType == LogType.Modules && Settings.DebugModules) doLog = true;
+      if (logType == LogType.Overlay && Settings.DebugOverlay) doLog = true;
+      if (logType == LogType.UI && Settings.DebugUI) doLog = true;
+      if (logType == LogType.Persistence && Settings.DebugPersistence) doLog = true;
+      if (logType == LogType.Any) doLog = true;
+
+      if (doLog)
+        Debug.Log(String.Format("[{0}]{1}", logTag, str));
+    }
+
     public static void Log(string str)
     {
-      Debug.Log("[SpaceDust]" + str);
+      Debug.Log(String.Format("[{0}]{1}", logTag, str));
     }
-    public static void LogError(string str)
+
+    public static void LogWarning(string toLog)
     {
-      Debug.LogError("[SpaceDust]" + str);
+      Debug.LogWarning(String.Format("[{0}]{1}", logTag, toLog));
     }
-    public static void LogWarning(string str)
+    public static void LogError(string toLog)
     {
-      Debug.LogWarning("[SpaceDust]" + str);
+      Debug.LogError(String.Format("[{0}]{1}", logTag, toLog));
     }
 
     /// <summary>
@@ -155,9 +187,9 @@ namespace SpaceDust
       double rUnit = ves.mainBody.Radius / ves.mainBody.atmosphereDepth;
       double yUnit = ves.altitude / ves.mainBody.atmosphereDepth;
 
-      
-      double zenithAngle = Vector3d.Angle(ves.GetWorldPos3D() - ves.mainBody.position,  target.position - ves.mainBody.position)*Mathf.Deg2Rad;
-      
+
+      double zenithAngle = Vector3d.Angle(ves.GetWorldPos3D() - ves.mainBody.position, target.position - ves.mainBody.position) * Mathf.Deg2Rad;
+
       double x = Math.Sqrt(Math.Pow(rUnit + yUnit, 2) * Math.Pow(Math.Cos(zenithAngle), 2) + 2d * rUnit * (1d - yUnit) - yUnit * yUnit + 1d) - (rUnit + yUnit) * Math.Cos(zenithAngle);
 
       return x;

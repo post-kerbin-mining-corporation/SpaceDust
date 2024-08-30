@@ -26,7 +26,7 @@ namespace SpaceDust
         }
         catch (TypeLoadException except)
         {
-          Utils.LogError($"[SpaceDust] Critical error loading SpaceDustInstrument from confignode {except.Message}");
+          Utils.LogError($"Critical error loading SpaceDustInstrument from confignode {except.Message}");
         }
         try
         {
@@ -34,7 +34,7 @@ namespace SpaceDust
         }
         catch (TypeLoadException except)
         {
-          Utils.LogError($"[SpaceDust] Critical error loading SpaceDustResource from configNode {except.Message}");
+          Utils.LogError($"Critical error loading SpaceDustResource from configNode {except.Message}");
         }
       }
     }
