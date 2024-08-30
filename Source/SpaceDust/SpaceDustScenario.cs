@@ -19,7 +19,7 @@ namespace SpaceDust
 
     public override void OnAwake()
     {
-      Utils.Log("[SpaceDustScenario]: Awake");
+      Utils.Log("[SpaceDustScenario]: Awake", LogType.Persistence);
       Instance = this;
       base.OnAwake();
     }
@@ -29,14 +29,14 @@ namespace SpaceDust
     /// <param name="node"></param>
     public override void OnLoad(ConfigNode node)
     {
-      Utils.Log("[SpaceDustScenario]: Started Loading");
+      Utils.Log("[SpaceDustScenario]: Started Loading", LogType.Persistence);
       base.OnLoad(node);
       if (distributionData == null) distributionData = new List<SpaceDustDiscoveryData>();
       foreach (ConfigNode saveNode in node.GetNodes(Settings.PERSISTENCE_DATA_NODE_NAME))
       {
         distributionData.Add(new SpaceDustDiscoveryData(saveNode));
       }
-      Utils.Log("[SpaceDustScenario]: Done Loading");
+      Utils.Log("[SpaceDustScenario]: Done Loading", LogType.Persistence);
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ namespace SpaceDust
     /// <param name="node"></param>
     public override void OnSave(ConfigNode node)
     {
-      Utils.Log("[SpaceDustScenario]: Started Saving");
+      Utils.Log("[SpaceDustScenario]: Started Saving", LogType.Persistence);
       base.OnSave(node);
 
       if (distributionData != null)
@@ -55,7 +55,7 @@ namespace SpaceDust
           node.AddNode(data.Save());
         }
       }
-      Utils.Log("[SpaceDustScenario]: Done Saving");
+      Utils.Log("[SpaceDustScenario]: Done Saving", LogType.Persistence);
     }
 
     /// <summary>
@@ -224,12 +224,12 @@ namespace SpaceDust
           ScreenMessage msg = new ScreenMessage(Localizer.Format(BAND_DISCOVERED_MESSAGE_KEY, resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
           ScreenMessages.PostScreenMessage(msg);
         }
-        Utils.Log($"[SpaceDustScenario]: Discovered {resourceName} in {band.name} at {bodyName}");
+        Utils.Log($"[SpaceDustScenario]: Discovered {resourceName} in {band.name} at {bodyName}", LogType.Persistence);
 
         if (addScience && (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX))
         {
           float scienceValue = FlightGlobals.GetBodyByName(bodyName).scienceValues.InSpaceHighDataValue * band.identifyScienceReward;
-          Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was discovered");
+          Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was discovered", LogType.Persistence);
 
           ResearchAndDevelopment.Instance.AddScience(scienceValue, TransactionReasons.ScienceTransmission);
         }
@@ -275,11 +275,11 @@ namespace SpaceDust
           ScreenMessage msg = new ScreenMessage(Localizer.Format(BAND_IDENTIFIED_MESSAGE_KEY, resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
           ScreenMessages.PostScreenMessage(msg);
         }
-        Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {band.name} at {bodyName}");
+        Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {band.name} at {bodyName}", LogType.Persistence);
         if (addScience && (HighLogic.CurrentGame.Mode == Game.Modes.CAREER || HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX))
         {
           float scienceValue = FlightGlobals.GetBodyByName(bodyName).scienceValues.InSpaceHighDataValue * band.identifyScienceReward;
-          Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was identified");
+          Utils.Log($"[SpaceDustScenario]: Added {scienceValue} science because  {band.name} at {bodyName} was identified", LogType.Persistence);
 
           ResearchAndDevelopment.Instance.AddScience(scienceValue, TransactionReasons.ScienceTransmission);
         }
@@ -416,7 +416,7 @@ namespace SpaceDust
         ScreenMessage msg = new ScreenMessage(Localizer.Format(BAND_IDENTIFIED_MESSAGE_KEY, resourceName, bodyName), 5f, ScreenMessageStyle.UPPER_CENTER);
         ScreenMessages.PostScreenMessage(msg);
       }
-      Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {bandName} at {bodyName}");
+      Utils.Log($"[SpaceDustScenario]: Identified {resourceName} in {bandName} at {bodyName}", LogType.Persistence);
       return 0f;
     }
   }

@@ -1,3 +1,9 @@
+v0.5.3
+------
+- Fixed verbose logging being on by default
+- Hid more various debug messages behind logging flags to 
+- Fixed an issue with the Argon patch for the built-in harvesters that would cause harvesting to not work in low but valid concentration environments
+
 v0.5.2
 ------
 - Updated B9PartSwitch to 2.20.0

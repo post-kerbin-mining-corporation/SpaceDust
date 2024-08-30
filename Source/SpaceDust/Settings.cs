@@ -12,15 +12,17 @@ namespace SpaceDust
   public static class Settings
   {
     /// Emit UI debug messages
-    public static bool DebugUI = true;
+    public static bool DebugUI = false;
     /// Emit Overlay debug messages
-    public static bool DebugOverlay = true;
+    public static bool DebugOverlay = false;
     /// Emit module  debug messages
-    public static bool DebugModules = true;
-    /// Emit background  debug messages
-    public static bool DebugBackground = true;
-    /// Emit background  debug messages
-    public static bool DebugLoading = true;
+    public static bool DebugModules = false;
+    /// Emit background processing debug messages
+    public static bool DebugBackground = false;
+    /// Emit loading debug messages
+    public static bool DebugLoading = false;
+    /// Emit persistence debug messages
+    public static bool DebugPersistence = false;
 
     /// Whether SystemHeat has been installed or not
     public static bool SystemHeatActive = false;
@@ -108,6 +110,8 @@ namespace SpaceDust
         // Emit module  debug messages
         settingsNode.TryGetValue("DebugModules", ref DebugModules);
         settingsNode.TryGetValue("DebugLoading", ref DebugLoading);
+        settingsNode.TryGetValue("DebugPersistence", ref DebugPersistence);
+        settingsNode.TryGetValue("DebugBackground", ref DebugBackground);
 
         settingsNode.TryGetValue("SetAllDiscovered", ref SetAllDiscovered);
         settingsNode.TryGetValue("SetAllIdentified", ref SetAllIdentified);
@@ -124,7 +128,7 @@ namespace SpaceDust
         settingsNode.TryGetValue("particleFieldMaxParticleCount", ref particleFieldMaxParticleCount);
         settingsNode.TryGetValue("particleFieldMaxViewportParticleScale", ref particleFieldMaxViewportParticleScale);
 
-        Utils.Log($"[Settings]: Game Scale is {GameScale}");
+        Utils.Log($"[Settings]: Game Scale is {GameScale}", LogType.Loading);
 
         ConfigNode colorNode = settingsNode.GetNode("ResourceColors");
         resourceColors = new Dictionary<string, Color>();
@@ -145,12 +149,12 @@ namespace SpaceDust
 
         ConfigNode shownNodes = settingsNode.GetNode("ResourceVisibilities");
         visibleResources = shownNodes.GetValuesList("name");
-        Utils.Log($"[Settings]: Resources configured as visible are {String.Join(", ", visibleResources.ToArray())}");
+        Utils.Log($"[Settings]: Resources configured as visible are {String.Join(", ", visibleResources.ToArray())}", LogType.Loading);
 
       }
       else
       {
-        Utils.Log("[Settings]: Couldn't find settings file, using defaults");
+        Utils.Log("[Settings]: Couldn't find settings file, using defaults", LogType.Loading);
       }
 
       Utils.Log("[Settings]: Finished loading");

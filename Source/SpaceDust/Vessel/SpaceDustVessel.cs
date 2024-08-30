@@ -40,7 +40,7 @@ namespace SpaceDust
       {
         if (!vessel.loaded)
         {
-          
+
           RefreshVesselData();
         }
       }
@@ -63,7 +63,7 @@ namespace SpaceDust
     protected void RefreshVesselData(Vessel eventVessel)
     {
       //if (Settings.DebugModules)
-        //Utils.Log(String.Format("[{0}]: Refreshing VesselData from Vessel event", this.GetType().Name));
+      //Utils.Log(String.Format("[{0}]: Refreshing VesselData from Vessel event", this.GetType().Name));
       RefreshVesselData();
     }
     /// <summary>
@@ -71,8 +71,8 @@ namespace SpaceDust
     /// </summary>
     protected void RefreshVesselData(ConfigNode node)
     {
-     // if (Settings.DebugBackground)
-       // Utils.Log(String.Format("[{0}]: Refreshing VesselData from save node event", this.GetType().Name));
+      // if (Settings.DebugBackground)
+      // Utils.Log(String.Format("[{0}]: Refreshing VesselData from save node event", this.GetType().Name));
       RefreshVesselData();
     }
 
@@ -97,8 +97,8 @@ namespace SpaceDust
         ProtoPartModuleSnapshot telescopeProto = protoPart.modules.Find(x => x.moduleName == "ModuleSpaceDustTelescope");
         if (telescopeProto != null)
         {
-          if (Settings.DebugBackground)
-            Utils.Log($"[SpaceDustBackgroundSim]: Found ModuleSpaceDustTelescope on {vessel.name} that is unloaded, adding to background simulation");
+
+          Utils.Log($"[SpaceDustBackgroundSim]: Found ModuleSpaceDustTelescope on {vessel.name} that is unloaded, adding to background simulation", LogType.Background);
 
           var telescopePrefab = module_prefabs.Find(x => x.moduleName == "ModuleSpaceDustTelescope");
 
@@ -112,8 +112,8 @@ namespace SpaceDust
         ProtoPartModuleSnapshot harvesterProto = protoPart.modules.Find(x => x.moduleName == "ModuleSpaceDustHarvester");
         if (harvesterProto != null)
         {
-          if (Settings.DebugBackground)
-            Utils.Log($"[SpaceDustBackgroundSim]:Found ModuleSpaceDustHarvester on {vessel.name} that is unloaded, adding to background simulation");
+
+          Utils.Log($"[SpaceDustBackgroundSim]:Found ModuleSpaceDustHarvester on {vessel.name} that is unloaded, adding to background simulation", LogType.Background);
 
           var harvestPrefab = module_prefabs.Find(x => x.moduleName == "ModuleSpaceDustHarvester");
           SpaceDustHarvesterBackground protoHarvester = new SpaceDustHarvesterBackground(vessel, harvesterProto, harvestPrefab);

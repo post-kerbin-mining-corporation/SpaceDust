@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using KSP.UI.Screens;
 using KSP.UI;
 using UnityEngine;
@@ -56,10 +53,7 @@ namespace SpaceDust
 
     public void OnMapEntered()
     {
-      if (Settings.DebugUI)
-      {
-        Utils.Log($"[ToolbarUI] Entering map view, focus on {PlanetariumCamera.fetch.target.DisplayName}");
-      }
+      Utils.Log($"[ToolbarUI] Entering map view, focus on {PlanetariumCamera.fetch.target.DisplayName}", LogType.UI);
       CelestialBody body = PlanetariumCamera.fetch.target.celestialBody;
       if (body == null)
       {
@@ -70,19 +64,14 @@ namespace SpaceDust
 
     public void OnMapExited()
     {
-      if (Settings.DebugUI)
-      {
-        Utils.Log($"[ToolbarUI] Exiting map view");
-      }
+      Utils.Log($"[ToolbarUI] Exiting map view", LogType.UI);
       if (toolbarPanel != null)
         toolbarPanel.SetVisible(false);
     }
     public void OnMapFocusChange(MapObject mapObject)
     {
-      if (Settings.DebugUI)
-      {
-        Utils.Log($"[ToolbarUI] Changed focus to {mapObject.GetName()}");
-      }
+
+      Utils.Log($"[ToolbarUI] Changed focus to {mapObject.GetName()}", LogType.UI);
       if (mapObject != null)
       {
         CelestialBody body = mapObject.celestialBody;

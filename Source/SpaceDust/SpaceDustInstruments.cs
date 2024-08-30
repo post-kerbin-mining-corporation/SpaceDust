@@ -31,14 +31,14 @@ namespace SpaceDust
         {
           SpaceDustInstrument newInst = new SpaceDustInstrument(node);
           Instruments.Add(newInst.Name, newInst);
-          Utils.Log($"[SpaceDustInstruments]: Added {newInst.Name} to database");
+          Utils.Log($"[SpaceDustInstruments]: Added {newInst.Name} to database", LogType.Loading);
         }
         catch (Exception)
         {
           throw new TypeLoadException(node.ToString());
         }
       }
-      Utils.Log($"[SpaceDustInstruments]: Loaded {Instruments.Count} telescope instruments");
+      Utils.Log($"[SpaceDustInstruments]: Loaded {Instruments.Count} telescope instruments", LogType.Loading);
 
     }
 
