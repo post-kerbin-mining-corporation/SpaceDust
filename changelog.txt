@@ -1,3 +1,16 @@
+v0.5.4
+------
+- Rebalanced Antimatter distributions
+ - Generally things collect much faster everywhere
+ - Lower Kerbin band should now net a gram of antimatter in about 2y of scoping 
+ - Upper Kerbin band is much more variable per save seed, you may get very lucky!
+ - Low Jool band is the best place to scoop things
+ - Add a Laythe shell which has high variability but good potentials
+- Rebalanced Hydrogen distributions
+ - Rates generally increased
+ - Added a low Jool orbit band up to 600 km above the atmosphere with good scooping potential
+- Fixed most Antimatter bands being defined as Atmosphere for the UI
+
 v0.5.3
 ------
 - Fixed verbose logging being on by default

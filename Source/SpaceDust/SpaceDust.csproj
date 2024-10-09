@@ -91,6 +91,7 @@
     <Compile Include="Overlay\DistributionMesh.cs" />
     <Compile Include="Overlay\FieldCollision.cs" />
     <Compile Include="Overlay\MapOverlayInspectorPanel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpaceDust.cs" />
     <Compile Include="SpaceDustDiscoveryData.cs" />
     <Compile Include="SpaceDustInstrument.cs" />
