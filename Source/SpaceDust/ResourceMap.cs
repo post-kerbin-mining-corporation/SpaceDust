@@ -85,7 +85,10 @@ namespace SpaceDust
         {
           for (int i = 0; i < Resources[body.name].Count; i++)
           {
-            getResources.Add(Resources[body.name][i].ResourceName);
+            if (!getResources.Contains(Resources[body.name][i].ResourceName))
+            {
+              getResources.Add(Resources[body.name][i].ResourceName);
+            }
           }
         }
       }
@@ -107,7 +110,9 @@ namespace SpaceDust
         for (int i = 0; i < Resources[body.name].Count; i++)
         {
           if (Resources[body.name][i].ResourceName == resourceName)
-            dist = Resources[body.name][i].Bands;
+          {
+            dist.AddRange(Resources[body.name][i].Bands);
+          }
 
         }
       }
