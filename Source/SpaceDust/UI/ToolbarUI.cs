@@ -33,11 +33,11 @@ namespace SpaceDust
       {
         GameEvents.onGUIApplicationLauncherReady.Add(OnGUIAppLauncherReady);
         GameEvents.onGUIApplicationLauncherDestroyed.Add(OnGUIAppLauncherDestroyed);
+        GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
 
         GameEvents.OnMapEntered.Add(new EventVoid.OnEvent(OnMapEntered));
         GameEvents.OnMapExited.Add(new EventVoid.OnEvent(OnMapExited));
         GameEvents.OnMapFocusChange.Add(new EventData<MapObject>.OnEvent(OnMapFocusChange));
-        GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
       }
       resourceVisibilities = new Dictionary<string, bool>();
       Instance = this;
@@ -224,10 +224,13 @@ namespace SpaceDust
       {
         ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
       }
+      GameEvents.onGUIApplicationLauncherDestroyed.Remove(OnGUIAppLauncherDestroyed);
+      GameEvents.onGUIApplicationLauncherUnreadifying.Remove(OnGUIAppLauncherUnreadifying);
 
       GameEvents.OnMapEntered.Remove(OnMapEntered);
       GameEvents.OnMapFocusChange.Remove(OnMapFocusChange);
       GameEvents.OnMapExited.Remove(OnMapExited);
+
     }
 
     protected void OnGUIAppLauncherReady()
